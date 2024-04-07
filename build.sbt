@@ -26,7 +26,7 @@ ThisBuild / homepage := Some(url("https://beangle.github.io/jdbc/index.html"))
 val beangle_common_ver = "5.6.15"
 
 val beangle_commons = "org.beangle.commons" % "beangle-commons" % beangle_common_ver
-val commonDeps = Seq(beangle_commons, logback_classic % "test", logback_core % "test", scalatest)
+val commonDeps = Seq(beangle_commons, logback_classic % "test", scalatest)
 
 lazy val root = (project in file("."))
   .settings(
