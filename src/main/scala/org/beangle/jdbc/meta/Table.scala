@@ -243,7 +243,7 @@ class Table(s: Schema, n: Identifier) extends Relation(s, n) {
     val ukName = uniqueKeys.find { uk => uk.columns.size == 1 && uk.columns.contains(column.name) }.map(_.name.value)
     remove(column)
     columns += column
-    if column.unique then this.createUniqueKey(ukName.getOrElse(this.name.value + "_" + column.name.value + "_key"), column.name.value)
+    if column.unique then this.createUniqueKey(ukName.getOrElse(""), column.name.value)
     column
   }
 

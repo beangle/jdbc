@@ -23,6 +23,7 @@ import scala.collection.mutable.ListBuffer
 
 /**
  * Table Constraint Metadata
+ *
  * @author chaostone
  */
 class Constraint(var table: Table, var name: Identifier) extends Ordered[Constraint] with Cloneable {
@@ -61,7 +62,7 @@ class Constraint(var table: Table, var name: Identifier) extends Ordered[Constra
     if (null == name) 0 else name.compare(o.name)
   }
 
-  protected def sameNameColumns(columns1: Iterable[Identifier],columns2: Iterable[Identifier]):Boolean={
+  protected def sameNameColumns(columns1: Iterable[Identifier], columns2: Iterable[Identifier]): Boolean = {
     columns1.toSet == columns2.toSet
   }
 
@@ -114,6 +115,7 @@ object Constraint {
   }
 
   /** hash string to full alphanumeric,length less than 30
+   *
    * @param s
    * @return
    */
@@ -122,7 +124,7 @@ object Constraint {
     md.reset()
     md.update(s.getBytes)
     val digest = md.digest() // 16bytes,128bits
-    val radix=35 // 0~9 a~y 6bits,128/5=25,result length isn't greate than 25
+    val radix = 35 // 0~9 a~y 6bits,128/5=25,result length isn't greate than 25
     new BigInteger(1, digest).toString(radix)
   }
 }
