@@ -63,6 +63,20 @@ class Index(var table: Table, var name: Identifier) extends Cloneable {
     columns ++= changed
   }
 
+  /** 添加到指定位置
+   *
+   * @param position 0 based
+   * @param column
+   */
+  def addColumn(position: Int, column: Identifier): Unit = {
+    if (column != null) {
+      while (columns.size < position + 1) {
+        columns += null
+      }
+      columns(position) = column
+    }
+  }
+
   def addColumn(column: Identifier): Unit = {
     if (column != null) columns += column
   }

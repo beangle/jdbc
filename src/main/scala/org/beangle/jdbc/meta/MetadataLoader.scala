@@ -235,7 +235,10 @@ class MetadataLoader(meta: DatabaseMetaData, engine: Engine) extends Logging {
           if (null != defaultValue) {
             var dv = Strings.trim(defaultValue)
             if (Strings.isNotEmpty(dv) && dv.contains("::")) {
-              dv = Strings.substringBefore(dv, "::")
+              dv = Strings.substringBefore(dv, "::").trim
+              if (SqlType.isNumberType(typecode)) {
+                if dv.startsWith("'") && dv.endsWith("'") then dv = Strings.substringBetween(dv, "'", "'")
+              }
             }
             if dv.nonEmpty && dv != "null" then col.defaultValue = Option(dv)
           }
@@ -400,7 +403,9 @@ class MetadataLoader(meta: DatabaseMetaData, engine: Engine) extends Logging {
             if (index != null && !table.isPrimaryKeyIndex(index)) {
               val info = table.getIndex(index).getOrElse(table.add(new Index(table, getIdentifier(rs, IndexName))))
               info.unique = !rs.getBoolean("NON_UNIQUE")
-              info.addColumn(getIdentifier(rs, ColumnName))
+              var position = rs.getShort(OrdinalPosition) - 1
+              if (position < 0) position = 0
+              info.addColumn(position, getIdentifier(rs, ColumnName))
             }
           }
           rs.close()

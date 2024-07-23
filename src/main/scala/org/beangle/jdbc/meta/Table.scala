@@ -154,7 +154,7 @@ class Table(s: Schema, n: Identifier) extends Relation(s, n) {
   }
 
   def createIndex(indexName: String, unique: Boolean, columnNames: String*): Index = {
-    val index = new Index(this, Identifier("indx_temp"))
+    val index = new Index(this, Identifier("idx_temp"))
     val eng = engine
     columnNames foreach { colName =>
       index.addColumn(eng.toIdentifier(colName))
@@ -268,8 +268,10 @@ class Table(s: Schema, n: Identifier) extends Relation(s, n) {
     }
   }
 
+  /** 目前无法区分唯一约束和唯一索引，所以将部分为了统一orm的行为和数据库规范，将非idx开头的唯一索引，转换为约束
+   */
   def convertIndexToUniqueKeys(): Unit = {
-    val ui = indexes.filter(i => i.unique)
+    val ui = indexes.filter(i => i.unique && !i.name.value.toLowerCase.startsWith("idx"))
     indexes --= ui
     ui foreach { i => createUniqueKey(i.name.value, i.columns.map(_.value).toSeq: _*) }
   }
