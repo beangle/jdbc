@@ -17,7 +17,6 @@
 
 package org.beangle.jdbc.engine
 
-import org.beangle.commons.lang.{Numbers, Strings}
 import org.beangle.jdbc.meta.{MetadataLoadSql, SqlType}
 
 abstract class AbstractEngine extends Engine with AbstractDialect {
@@ -89,7 +88,7 @@ abstract class AbstractEngine extends Engine with AbstractDialect {
         value match
           case "true" => Some("1")
           case "false" => Some("0")
-          case _ => Some(value).filter(Numbers.isDigits)
+          case _ => Some(value)
       else if sqlType.isBooleanType then
         value match
           case "1" | "Y" | "true" | "yes" => Some("true")

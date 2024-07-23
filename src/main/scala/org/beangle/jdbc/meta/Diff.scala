@@ -274,7 +274,7 @@ object Diff {
     if (nCol.comment != oCol.comment) {
       commentDdl ++= engine.commentOnColumn(table, nCol, nCol.comment)
     }
-    // ignore check and unique,using constrants
+    // ignore check and unique,using constraints
   }
 
 }
