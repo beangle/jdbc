@@ -67,7 +67,7 @@ object JdbcExecutor {
       }
     val typ = Array.ofDim[Int](cols)
     (0 until cols) foreach { i =>
-      typ(i) = engine.resolveCode(meta.getColumnType(i + 1), meta.getColumnTypeName(i + 1))
+      typ(i) = engine.resolveCode(meta.getColumnType(i + 1), None, Some(meta.getColumnTypeName(i + 1)))
     }
     typ
   }

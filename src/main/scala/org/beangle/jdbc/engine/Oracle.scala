@@ -17,6 +17,8 @@
 
 package org.beangle.jdbc.engine
 
+import org.beangle.jdbc.meta.SqlType
+
 import java.sql.Types
 import java.sql.Types.*
 import scala.collection.mutable
@@ -137,10 +139,10 @@ class Oracle10g extends AbstractEngine {
 
   override def version: Version = Version("[10.1,)")
 
-  override def resolveCode(typeCode: Int, typeName: String): Int = {
+  override def resolveCode(typeCode: Int, precision: Option[Int], typeName: Option[String]): Int = {
     typeCode match {
       case -101 | -102 => Types.TIMESTAMP_WITH_TIMEZONE
-      case _ => typeCode
+      case _ => super.resolveCode(typeCode, precision, typeName)
     }
   }
 
@@ -158,7 +160,7 @@ class Oracle10g extends AbstractEngine {
     List("OUTLN", "SYS", "SYSTEM", "SI_INFORMTN_SCHEMA", "DIP", "ANONYMOUS", "AUDSYS",
       "SPATIAL_CSW_ADMIN_USR", "SPATIAL_WFS_ADMIN_USR", "GSMADMIN_INTERNAL", "GSMCATUSER",
       "GSMUSER", "ORACLE_OCM", "MDDATA", "DBSFWUSER", "DBSNMP", "DVF", "ORDDATA", "ORDPLUGINS",
-      "REMOTE_SCHEDULER_AGENT", "XDB","BACKMAN")
+      "REMOTE_SCHEDULER_AGENT", "XDB", "BACKMAN")
   }
 
 }

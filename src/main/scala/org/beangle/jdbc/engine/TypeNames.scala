@@ -133,8 +133,7 @@ class TypeNames(private val code2names: Map[Int, List[(Int, String)]],
   }
 
   def toType(sqlCode: Int, precision: Int, scale: Int): SqlType = {
-    val targetCode = normalize(sqlCode, precision)
-    SqlType(targetCode, toName(targetCode, precision, scale), precision, scale)
+    SqlType(sqlCode, toName(sqlCode, precision, scale), precision, scale)
   }
 
   def toType(typeName: String): SqlType = {
@@ -145,7 +144,7 @@ class TypeNames(private val code2names: Map[Int, List[(Int, String)]],
   }
 
   protected[engine] def toName(typecode: Int): String = {
-    code2names.get(normalize(typecode, 0)) match {
+    code2names.get(typecode) match {
       case None => "other"
       case Some(l) => l.head._2
     }
@@ -182,20 +181,6 @@ class TypeNames(private val code2names: Map[Int, List[(Int, String)]],
           case None => l.head._2
           case Some(n) => n._2
         }
-    }
-  }
-
-  private def normalize(sqlCode: Int, precision: Int): Int = {
-    sqlCode match {
-      case DECIMAL | NUMERIC =>
-        precision match {
-          case 1 => BOOLEAN
-          case 5 => SMALLINT
-          case 10 => INTEGER
-          case 19 => BIGINT
-          case _ => sqlCode
-        }
-      case _ => sqlCode
     }
   }
 

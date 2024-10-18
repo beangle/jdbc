@@ -22,6 +22,8 @@ import org.beangle.commons.io.IOs
 import org.beangle.commons.lang.{ClassLoaders, Strings}
 import org.beangle.jdbc.meta.{Identifier, MetadataLoadSql, SqlType}
 
+import java.sql.Types
+
 object Engine {
   val reservedWords: Set[String] = loadKeywords("sql-reserved.txt")
 
@@ -75,7 +77,7 @@ trait Engine extends Dialect {
    * @param typeName
    * @return
    */
-  def resolveCode(typeCode: Int, typeName: String): Int = typeCode
+  def resolveCode(typeCode: Int, precision: Option[Int], typeName: Option[String]): Int
 
   def needQuote(name: String): Boolean = {
     val lowcaseName = name.toLowerCase

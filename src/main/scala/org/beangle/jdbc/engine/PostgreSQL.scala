@@ -89,28 +89,19 @@ class PostgreSQL10 extends AbstractEngine {
 
   override def storeCase: StoreCase = StoreCase.Lower
 
-  override def toType(sqlCode: Int, precision: Int, scale: Int): SqlType = {
-    if (sqlCode == BLOB) {
-      super.toType(VARBINARY, precision, scale)
-    } else {
-      super.toType(sqlCode, precision, scale)
-    }
-  }
-
   override def defaultSchema: String = "public"
 
   override def name: String = "PostgreSQL"
 
   override def version: Version = Version("[10.0,)")
 
-  override def resolveCode(typeCode: Int, typeName: String): Int = {
+  override def resolveCode(typeCode: Int, precision: Option[Int], typeName: Option[String]): Int = {
     typeCode match {
       case TIMESTAMP =>
-        typeName match {
-          case "timestamptz" => TIMESTAMP_WITH_TIMEZONE
-          case _ => TIMESTAMP
-        }
-      case _ => typeCode
+        if typeName.nonEmpty && typeName.get.toLowerCase == "timestamptz" then TIMESTAMP_WITH_TIMEZONE
+        else TIMESTAMP
+      case BLOB => VARBINARY
+      case _ => super.resolveCode(typeCode, precision, typeName)
     }
   }
 

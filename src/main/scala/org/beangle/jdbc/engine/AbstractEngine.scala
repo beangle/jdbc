@@ -19,6 +19,8 @@ package org.beangle.jdbc.engine
 
 import org.beangle.jdbc.meta.{MetadataLoadSql, SqlType}
 
+import java.sql.Types
+
 abstract class AbstractEngine extends Engine with AbstractDialect {
 
   protected[engine] var typeNames: TypeNames = _
@@ -72,7 +74,37 @@ abstract class AbstractEngine extends Engine with AbstractDialect {
   }
 
   override def toType(sqlCode: Int, precision: Int, scale: Int): SqlType = {
-    typeNames.toType(sqlCode, precision, scale)
+    val targetCode = resolveCode(sqlCode, Some(precision), None)
+    if (precision == 0) {
+      val p = if sqlCode == Types.BOOLEAN || sqlCode == Types.BIT then 1 else precision
+      typeNames.toType(targetCode, p, scale)
+    } else {
+      typeNames.toType(targetCode, precision, scale)
+    }
+  }
+
+  override def resolveCode(typeCode: Int, precision: Option[Int], typeName: Option[String]): Int = {
+    precision match
+      case None => convertBoolean(typeCode)
+      case Some(p) =>
+        typeCode match {
+          case Types.DECIMAL | Types.NUMERIC =>
+            p match {
+              case 1 => if supportBoolean then Types.BOOLEAN else typeCode
+              case 5 => Types.SMALLINT
+              case 10 => Types.INTEGER
+              case 19 => Types.BIGINT
+              case _ => typeCode
+            }
+          case _ => convertBoolean(typeCode)
+        }
+  }
+
+  private def convertBoolean(typeCode: Int): Int = {
+    typeCode match {
+      case Types.BIT | Types.BOOLEAN => if supportBoolean then Types.BOOLEAN else Types.NUMERIC
+      case _ => typeCode
+    }
   }
 
   override def supportBoolean: Boolean = true

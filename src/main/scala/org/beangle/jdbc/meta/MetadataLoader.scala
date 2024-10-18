@@ -168,6 +168,7 @@ class MetadataLoader(meta: DatabaseMetaData, engine: Engine) extends Logging {
     val catalogName = pattern._1
     val schemaPattern = pattern._2
     val sw = new Stopwatch(true)
+    logger.debug(s"Loading tables from $catalogName $schemaPattern from ${meta.getDatabaseProductName}")
     val rs = meta.getTables(catalogName, schemaPattern, null, Array("TABLE"))
     val tables = new mutable.HashMap[String, Table]
     while (rs.next()) {
@@ -210,8 +211,9 @@ class MetadataLoader(meta: DatabaseMetaData, engine: Engine) extends Logging {
     var cols = 0
     val types = Collections.newMap[String, SqlType]
     import java.util.StringTokenizer
+    //(1 to rs.getMetaData.getColumnCount) foreach{ i=> println(rs.getMetaData.getColumnName(i))}
     while (rs.next()) {
-      val defaultValue = rs.getString(ColumnDef) //should read first in oracle,my be it's long type
+      val defaultValue = rs.getString(ColumnDef) //should read first in oracle,may be it's long type
       val colName = rs.getString(ColumnName)
       if (null != colName) {
         val relation =
@@ -220,13 +222,15 @@ class MetadataLoader(meta: DatabaseMetaData, engine: Engine) extends Logging {
 
         relation foreach { r =>
           val typename = new StringTokenizer(rs.getString(TypeName), "() ").nextToken()
-          val typecode = engine.resolveCode(rs.getInt(DataType), typename)
+          val datatype = rs.getInt(DataType)
           var length = rs.getInt(ColumnSize)
           var scale = rs.getInt(DecimalDigits)
-          if (scale == -127 && length == 0 && SqlType.isNumberType(typecode)) { // in oracle view,it will return -127
+          // in oracle view,it will return -127
+          if (scale == -127 && length == 0 && SqlType.isNumberType(datatype)) {
             scale = 5
             length = 19
           }
+          val typecode = engine.resolveCode(datatype, Some(length), Some(typename))
           val key = s"$typecode-$typename-$length-$scale"
           val sqlType = types.getOrElseUpdate(key, engine.toType(typecode, length, scale))
           val nullable = "yes".equalsIgnoreCase(rs.getString(IsNullable))
@@ -236,7 +240,7 @@ class MetadataLoader(meta: DatabaseMetaData, engine: Engine) extends Logging {
             var dv = Strings.trim(defaultValue)
             if (Strings.isNotEmpty(dv) && dv.contains("::")) {
               dv = Strings.substringBefore(dv, "::").trim
-              if (SqlType.isNumberType(typecode)) {
+              if (SqlType.isNumberType(datatype)) {
                 if dv.startsWith("'") && dv.endsWith("'") then dv = Strings.substringBetween(dv, "'", "'")
               }
             }

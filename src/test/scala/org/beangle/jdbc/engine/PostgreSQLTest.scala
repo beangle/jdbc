@@ -28,6 +28,8 @@ class PostgreSQLTest extends AnyFlatSpec with Matchers {
 
   val engine = new PostgreSQL10
 
+  val oracle = new Oracle10g
+
   "toType longlong varchar" should "vary from varchar to text" in {
     val t = engine.toType(Types.VARCHAR, 400000)
     val t2 = engine.toType(Types.VARCHAR, 5000)
@@ -40,6 +42,7 @@ class PostgreSQLTest extends AnyFlatSpec with Matchers {
     val precision = 65535
     engine.toType(Types.NUMERIC, precision, scale).name equals "numeric(1000, 0)" should be(true)
     engine.toType(Types.DECIMAL, 1, 0).name shouldEqual "boolean"
+    engine.toType(Types.BLOB, 10000, 0).name shouldEqual "bytea"
 
     //engine.toType(Types.DECIMAL,1,0) shouldEqual SqlType(BOOLEAN, "boolean", 1)
     engine.toType(Types.DECIMAL, 5, 0) shouldEqual SqlType(SMALLINT, "smallint", 5)
@@ -50,5 +53,25 @@ class PostgreSQLTest extends AnyFlatSpec with Matchers {
     nt.name shouldEqual "numeric"
     nt.precision shouldEqual None
     nt.scale shouldEqual None
+  }
+  "convert oracle to pg" should "be ok" in {
+    val ot = oracle.toType(Types.NUMERIC, 1)
+    ot.name shouldEqual "number(1,0)"
+    ot.precision shouldEqual Some(1)
+    ot.code shouldEqual Types.NUMERIC
+    val pt = engine.toType(ot.code, ot.precision.getOrElse(0), ot.scale.getOrElse(0))
+    pt.name shouldEqual "boolean"
+    pt.precision shouldEqual Some(1)
+    pt.code shouldEqual Types.BOOLEAN
+  }
+  "convert pg to oracle" should "be ok" in {
+    val pt = engine.toType(Types.BOOLEAN)
+    pt.precision shouldEqual Some(1)
+    pt.name shouldEqual "boolean"
+    pt.code shouldEqual Types.BOOLEAN
+    val ot = oracle.toType(pt.code, pt.precision.getOrElse(0), pt.scale.getOrElse(0))
+    ot.name shouldEqual "number(1,0)"
+    ot.precision shouldEqual Some(1)
+    ot.code shouldEqual Types.NUMERIC
   }
 }

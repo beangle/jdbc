@@ -62,7 +62,9 @@ object ParamSetter extends Logging {
             case i: Number => stmt.setBoolean(index, i.intValue > 0)
           }
         case TINYINT | SMALLINT | INTEGER =>
-          stmt.setInt(index, value.asInstanceOf[Number].intValue)
+          value match
+            case i: Number => stmt.setInt(index, i.intValue)
+            case b: Boolean => stmt.setInt(index, if b then 1 else 0)
         case BIGINT =>
           stmt.setLong(index, value.asInstanceOf[Number].longValue)
 
