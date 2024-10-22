@@ -96,9 +96,9 @@ class Oracle10g extends AbstractEngine {
 
   metadataLoadSql.indexInfoSql =
     "select idx.INDEX_NAME,idx.table_owner TABLE_SCHEM,idx.table_name TABLE_NAME, case when uniqueness ='UNIQUE' then 0 else 1 end as NON_UNIQUE," +
-      " col.COLUMN_NAME,case when col.descend ='ASC' then  'A' else  'D' end as ASC_OR_DESC,col.column_position ORDINAL_POSITION" +
+      " col.COLUMN_NAME,case when col.descend ='ASC' then 'A' else 'D' end as ASC_OR_DESC,col.column_position ORDINAL_POSITION" +
       " from all_indexes idx,all_ind_columns col where col.index_name=idx.index_name" +
-      " and idx.table_owner=':schema'" +
+      " and idx.table_owner=':schema' and idx.table_owner=col.table_owner " +
       " order by idx.table_name,col.column_position"
 
   metadataLoadSql.viewDefSql = "select text from all_views where owner=':schema' and view_name=':view_name'"
