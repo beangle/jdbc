@@ -95,6 +95,10 @@ object MetadataLoader {
       IOs.close(conn)
     }
   }
+
+  def apply(conn: Connection, engine: Engine): MetadataLoader = {
+    new MetadataLoader(conn.getMetaData, engine)
+  }
 }
 
 class MetadataLoader(meta: DatabaseMetaData, engine: Engine) extends Logging {

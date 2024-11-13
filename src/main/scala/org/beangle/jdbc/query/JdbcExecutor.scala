@@ -275,13 +275,6 @@ class JdbcExecutor(dataSource: DataSource) extends Logging {
     msg.append(" Query: ").append(sql).append(" Parameters: (")
     if (params == null) msg.append("[]")
     else msg.append(Strings.join(params, ","))
-    var l = 0
-    params foreach {
-      case null => l += 0
-      case s: String => l += s.length
-      case _ =>
-    }
-    println(s"string length is ${l}")
     msg.append(") Parameter types: (").append(Strings.join(types.map(SqlType.typeName), ",")).append(')')
 
     val e = new SQLException(msg.toString, cause.getSQLState, cause.getErrorCode)
