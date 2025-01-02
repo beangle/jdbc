@@ -59,13 +59,15 @@ trait Dialect {
   def dropIndex(i: Index): String
 
   def supportSequence: Boolean
+
+  def supportMultiValueInsert: Boolean
 }
 
-trait AlterTableDialect(val table:Table) {
+trait AlterTableDialect(val table: Table) {
 
   def addColumn(col: Column): List[String]
 
-  def dropColumn( col: Column): String
+  def dropColumn(col: Column): String
 
   def renameColumn(col: Column, newName: String): String
 

@@ -24,6 +24,8 @@ class Database(val engine: Engine) {
 
   var version: String = "UNDEFINED"
 
+  var encoding: String = _
+
   var schemas = new collection.mutable.HashMap[Identifier, Schema]
 
   def getOrCreateSchema(schema: Identifier): Schema = {

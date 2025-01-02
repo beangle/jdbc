@@ -18,7 +18,7 @@
 package org.beangle.jdbc.engine
 
 import org.beangle.commons.lang.Strings
-import org.beangle.jdbc.meta.{Index, PrimaryKey, Table}
+import org.beangle.jdbc.meta.{Index, Table}
 
 import java.sql.Types.*
 
@@ -76,6 +76,8 @@ class MySQL5 extends AbstractEngine {
 
   options.comment.supportsCommentOn = false
 
+  metadataLoadSql.basicSql = "show variables like 'character_set_database'"
+
   functions { f =>
     f.currentDate = "current_date"
     f.localTime = "current_time"
@@ -115,4 +117,5 @@ class MySQL5 extends AbstractEngine {
 
   override def version: Version = Version("[5.5,)")
 
+  override def supportMultiValueInsert: Boolean = true
 }

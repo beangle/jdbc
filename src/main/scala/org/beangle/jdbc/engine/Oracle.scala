@@ -17,8 +17,6 @@
 
 package org.beangle.jdbc.engine
 
-import org.beangle.jdbc.meta.SqlType
-
 import java.sql.Types
 import java.sql.Types.*
 import scala.collection.mutable
@@ -102,6 +100,8 @@ class Oracle10g extends AbstractEngine {
       " order by idx.table_name,col.column_position"
 
   metadataLoadSql.viewDefSql = "select text from all_views where owner=':schema' and view_name=':view_name'"
+
+  metadataLoadSql.basicSql = "select userenv('language') from dual"
 
   /** limit offset
    * FIXME distinguish sql with order by or not

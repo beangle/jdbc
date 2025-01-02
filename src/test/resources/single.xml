@@ -2,8 +2,8 @@
 <properties>
   <url>jdbc:oracle:thin:@//localhost:1521/public</url>
   <driver>oracle</driver>
-  <user>tigre</user>
-  <password>tigre</password>
-  <schema>tigre</schema>
+  <user>tiger</user>
+  <password>tiger</password>
+  <schema>tiger</schema>
   <driverType>thin</driverType>
 </properties>

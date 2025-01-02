@@ -190,6 +190,7 @@ trait AbstractDialect extends Dialect {
     null != options.sequence
   }
 
+  override def supportMultiValueInsert: Boolean = false
 }
 
 class DefaultAlterTableDialect(table: Table, options: Options) extends AlterTableDialect(table) {

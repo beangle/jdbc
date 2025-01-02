@@ -32,5 +32,6 @@ lazy val root = (project in file("."))
   .settings(
     name := "beangle-jdbc",
     common,
-    libraryDependencies ++= (commonDeps ++ Seq(scalaxml, HikariCP % "optional", h2 % "test"))
+    libraryDependencies ++= commonDeps,
+    libraryDependencies ++= Seq(scalaxml, HikariCP % "optional", h2 % "test", postgresql % "optional")
   )

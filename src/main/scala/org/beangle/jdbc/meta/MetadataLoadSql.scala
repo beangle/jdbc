@@ -31,6 +31,8 @@ class MetadataLoadSql {
 
   var viewDefSql: String = _
 
+  var basicSql: String = _
+
   def supportsTableExtra: Boolean = {
     Strings.isNotBlank(primaryKeySql) && Strings.isNotBlank(importedKeySql) && Strings.isNotBlank(indexInfoSql)
   }

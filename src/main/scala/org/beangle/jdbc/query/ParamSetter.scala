@@ -17,6 +17,7 @@
 
 package org.beangle.jdbc.query
 
+import org.beangle.commons.conversion.string.BooleanConverter
 import org.beangle.commons.io.IOs
 import org.beangle.commons.logging.Logging
 import org.beangle.jdbc.SqlTypeMapping
@@ -60,6 +61,7 @@ object ParamSetter extends Logging {
           value match {
             case b: Boolean => stmt.setBoolean(index, b)
             case i: Number => stmt.setBoolean(index, i.intValue > 0)
+            case s: String => stmt.setBoolean(index, BooleanConverter.apply(s))
           }
         case TINYINT | SMALLINT | INTEGER =>
           value match
@@ -153,6 +155,10 @@ object ParamSetter extends Logging {
   }
 
   def setParams(stmt: PreparedStatement, params: collection.Seq[Any], types: collection.Seq[Int]): Unit = {
+    setParams(stmt, params, types, 1)
+  }
+
+  def setParams(stmt: PreparedStatement, params: collection.Seq[Any], types: collection.Seq[Int], startParamIndex: Int): Unit = {
     val paramsCount = if (params == null) 0 else params.length
     val stmtParamCount = types.length
     val sqltypes = types.toArray
@@ -162,7 +168,7 @@ object ParamSetter extends Logging {
 
     var i = 0
     while (i < stmtParamCount) {
-      val index = i + 1
+      val index = i + startParamIndex
       if (null == params(i)) {
         stmt.setNull(index, if (sqltypes(i) == NULL) VARCHAR else sqltypes(i))
       } else {

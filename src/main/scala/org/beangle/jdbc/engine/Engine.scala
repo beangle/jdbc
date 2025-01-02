@@ -41,7 +41,7 @@ object Engine {
 }
 
 /** RDBMS engine interface
- * It provides type mapping,default schema definition,key words,version etc.
+ * It provides type mapping,default schema definition,keywords,version etc.
  */
 trait Engine extends Dialect {
 

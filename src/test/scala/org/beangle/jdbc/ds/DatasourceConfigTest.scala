@@ -29,7 +29,7 @@ import scala.xml.XML
 class DatasourceConfigTest extends AnyFlatSpec with Matchers {
   "DatasourceConfig " should "build a correct orace datasource" in {
     val is = ClassLoaders.getResourceAsStream("datasources.xml").get
-    val config = DataSourceUtils.parseXml(is, "tigre")
+    val config = DataSourceUtils.parseXml(is, "tiger")
     assert(config.props.contains("driverType"))
   }
   "DataSourceUtils " should "build single datasource" in {

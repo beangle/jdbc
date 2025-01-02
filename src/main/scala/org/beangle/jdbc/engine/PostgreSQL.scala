@@ -17,8 +17,6 @@
 
 package org.beangle.jdbc.engine
 
-import org.beangle.jdbc.meta.SqlType
-
 import java.sql.Types
 import java.sql.Types.*
 
@@ -85,6 +83,8 @@ class PostgreSQL10 extends AbstractEngine {
 
   metadataLoadSql.viewDefSql = "select pg_get_viewdef(':schema.:view_name', true) as dfn"
 
+  metadataLoadSql.basicSql = "select pg_encoding_to_char(encoding) from pg_database where datname=current_database()"
+
   override def maxIdentifierLength: Int = 63
 
   override def storeCase: StoreCase = StoreCase.Lower
@@ -106,4 +106,6 @@ class PostgreSQL10 extends AbstractEngine {
   }
 
   override def systemSchemas: Seq[String] = List("information_schema", "pg_catalog")
+
+  override def supportMultiValueInsert: Boolean = true
 }

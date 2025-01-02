@@ -81,6 +81,7 @@ object MetadataLoader {
       loader.loadViews(schema, allFilter)
       loader.loadSequences(schema)
     }
+    loader.loadBasics(database)
     database
   }
 
@@ -128,6 +129,21 @@ class MetadataLoader(meta: DatabaseMetaData, engine: Engine) extends Logging {
     }
     names.subtractAll(removed)
     names.toSet.toSeq.sorted
+  }
+
+  def loadBasics(db: Database): Unit = {
+    db.version = s"${meta.getDatabaseMajorVersion}.${meta.getDatabaseMinorVersion}"
+    val basicSql = engine.metadataLoadSql.basicSql
+    if (Strings.isNotEmpty(basicSql)) {
+      val rs = meta.getConnection.createStatement().executeQuery(basicSql)
+      val colCount = rs.getMetaData.getColumnCount
+      while (rs.next()) {
+        var encoding = rs.getString(colCount)
+        if (encoding.contains(".")) encoding = Strings.substringAfter(encoding, ".")
+        db.encoding = encoding.toLowerCase
+      }
+      rs.close()
+    }
   }
 
   def loadTables(schema: Schema, extras: Boolean): Unit = {

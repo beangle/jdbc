@@ -21,7 +21,7 @@ import org.beangle.jdbc.meta.{MetadataLoadSql, SqlType}
 
 import java.sql.Types
 
-abstract class AbstractEngine extends Engine with AbstractDialect {
+abstract class AbstractEngine extends Engine, AbstractDialect {
 
   protected[engine] var typeNames: TypeNames = _
 
@@ -136,5 +136,4 @@ abstract class AbstractEngine extends Engine with AbstractDialect {
   override def catalogAsSchema: Boolean = false
 
   override def systemSchemas: Seq[String] = List("information_schema")
-
 }

@@ -17,6 +17,7 @@
 
 package org.beangle.jdbc.query
 
+import org.beangle.commons.collection.Collections
 import org.beangle.commons.collection.page.PageLimit
 import org.beangle.commons.io.{IOs, StringBuilderWriter}
 import org.beangle.commons.lang.Strings
@@ -28,7 +29,6 @@ import org.beangle.jdbc.meta.SqlType
 import java.sql.{BatchUpdateException, Connection, PreparedStatement, ResultSet, SQLException, Types}
 import javax.sql.DataSource
 import scala.Array
-import scala.collection.immutable.ArraySeq
 
 object JdbcExecutor {
   def convert(rs: ResultSet, types: Array[Int]): Array[Any] = {
@@ -220,6 +220,100 @@ class JdbcExecutor(dataSource: DataSource) extends Logging {
       conn.close()
     }
     rows
+  }
+
+  private def postgreCopy(sql: String, datas: collection.Seq[Array[_]], types: collection.Seq[Int]): Unit = {
+    val conn = dataSource.getConnection
+    try {
+      import org.postgresql.copy.CopyManager
+      import org.postgresql.core.BaseConnection
+      if (conn.getAutoCommit) conn.setAutoCommit(false)
+      val cm = new CopyManager(conn.unwrap(classOf[BaseConnection]))
+      var copySql = sql.replaceFirst("(?i)^insert(\\s*) into", "copy")
+      copySql = Strings.substringBefore(copySql, "values")
+      copySql += " FROM STDIN delimiter ',' csv encoding 'UTF-8'  escape ''''" //single '
+      cm.copyIn(copySql, new PostgresCsvReader(datas.iterator,types))
+      conn.commit()
+    } finally {
+      IOs.close(conn)
+    }
+  }
+
+  /** Batch insert data
+   *
+   * @param sql
+   * @param datas
+   * @param types
+   */
+  def batchInsert(sql: String, datas: collection.Seq[Array[_]], types: collection.Seq[Int]): Unit = {
+    if (engine.supportMultiValueInsert) {
+      if (engine.name.toLowerCase.startsWith("postgres")) {
+        postgreCopy(sql, datas, types)
+      } else {
+        if (showSql) println("JdbcExecutor:" + sql)
+        val conn = dataSource.getConnection
+        if (conn.getAutoCommit) conn.setAutoCommit(false)
+
+        var newSql = sql.trim()
+        if (newSql.endsWith(";")) newSql = newSql.substring(0, newSql.length - 1)
+        val valuesPlaceHolder = "," + Strings.substringAfterLast(newSql, "values")
+        val sqls = Collections.newMap[Int, String]
+        sqls.put(4, newSql + valuesPlaceHolder * (4 - 1))
+        sqls.put(2, newSql + valuesPlaceHolder * (2 - 1))
+        sqls.put(1, newSql)
+
+        var stmt: PreparedStatement = null
+        var curParam: Array[_] = null
+        var numSql: String = null
+        try {
+          val iter = datas.iterator
+          divide(datas.size) foreach { case (radix, num) =>
+            numSql = sqls(radix)
+            stmt = conn.prepareStatement(numSql)
+            (0 until num) foreach { i =>
+              for (j <- 0 until radix) {
+                val param = iter.next()
+                curParam = param
+                ParamSetter.setParams(stmt, param, types, (types.length * j) + 1)
+              }
+              stmt.addBatch()
+            }
+            stmt.executeBatch()
+            stmt.clearBatch()
+            stmt.close()
+          }
+          conn.commit()
+        } catch {
+          case be: BatchUpdateException =>
+            rollback(conn)
+            rethrow2(if be.getNextException == null then be else be.getNextException, numSql, types, curParam)
+          case e: SQLException =>
+            rollback(conn)
+            rethrow2(e, sql, types, curParam)
+        } finally {
+          IOs.close(stmt, conn)
+        }
+      }
+    } else {
+      batch(sql, datas, types)
+    }
+  }
+
+  /** Divide num into Seq(radix,num)
+   *
+   * @param num
+   * @return
+   */
+  private def divide(num: Int): collection.Seq[(Int, Int)] = {
+    val rs = Collections.newBuffer[(Int, Int)]
+    var n = num
+    List(4, 2, 1) foreach { k =>
+      if (n >= k) {
+        rs.addOne((k, n / k))
+        n = n % k
+      }
+    }
+    rs
   }
 
   def batch(sql: String, datas: collection.Seq[Array[_]], types: collection.Seq[Int]): Seq[Int] = {
