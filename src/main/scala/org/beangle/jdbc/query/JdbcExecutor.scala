@@ -26,11 +26,14 @@ import org.beangle.jdbc.DefaultSqlTypeMapping
 import org.beangle.jdbc.engine.{Engine, Engines}
 import org.beangle.jdbc.meta.SqlType
 
+import java.sql.Types.*
 import java.sql.{BatchUpdateException, Connection, PreparedStatement, ResultSet, SQLException, Types}
 import javax.sql.DataSource
 import scala.Array
 
 object JdbcExecutor {
+  private val NoTextTypes = Set(BINARY, VARBINARY, LONGVARBINARY, ARRAY, BLOB, CLOB, NCLOB, JAVA_OBJECT)
+
   def convert(rs: ResultSet, types: Array[Int]): Array[Any] = {
     val objs = Array.ofDim[Any](types.length)
     types.indices foreach { i =>
@@ -104,7 +107,6 @@ object JdbcExecutor {
 }
 
 class JdbcExecutor(dataSource: DataSource) extends Logging {
-
   private val engine = Engines.forDataSource(dataSource)
   val sqlTypeMapping = new DefaultSqlTypeMapping(engine)
   var showSql = false
@@ -232,11 +234,15 @@ class JdbcExecutor(dataSource: DataSource) extends Logging {
       var copySql = sql.replaceFirst("(?i)^insert(\\s*) into", "copy")
       copySql = Strings.substringBefore(copySql, "values")
       copySql += " FROM STDIN delimiter ',' csv encoding 'UTF-8'  escape ''''" //single '
-      cm.copyIn(copySql, new PostgresCsvReader(datas.iterator,types))
+      cm.copyIn(copySql, new PostgresCsvReader(datas.iterator, types))
       conn.commit()
     } finally {
       IOs.close(conn)
     }
+  }
+
+  private def existComplexTypes(types: collection.Seq[Int]): Boolean = {
+    types.exists(t => JdbcExecutor.NoTextTypes.contains(t))
   }
 
   /** Batch insert data
@@ -247,7 +253,7 @@ class JdbcExecutor(dataSource: DataSource) extends Logging {
    */
   def batchInsert(sql: String, datas: collection.Seq[Array[_]], types: collection.Seq[Int]): Unit = {
     if (engine.supportMultiValueInsert) {
-      if (engine.name.toLowerCase.startsWith("postgres")) {
+      if (engine.name.toLowerCase.startsWith("postgres") && !existComplexTypes(types)) {
         postgreCopy(sql, datas, types)
       } else {
         if (showSql) println("JdbcExecutor:" + sql)
