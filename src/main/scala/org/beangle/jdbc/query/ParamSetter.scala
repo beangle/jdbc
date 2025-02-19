@@ -21,6 +21,7 @@ import org.beangle.commons.conversion.string.BooleanConverter
 import org.beangle.commons.io.IOs
 import org.beangle.commons.logging.Logging
 import org.beangle.jdbc.SqlTypeMapping
+import org.beangle.jdbc.engine.Engine
 
 import java.io.*
 import java.math.BigDecimal
@@ -30,25 +31,51 @@ import java.time.*
 import java.util as ju
 
 object TypeParamSetter {
-  def apply(sqlTypeMapping: SqlTypeMapping, params: collection.Seq[Any]): TypeParamSetter = {
+  def apply(engine: Engine, sqlTypeMapping: SqlTypeMapping, params: collection.Seq[Any]): TypeParamSetter = {
     val types = new scala.Array[Int](params.length)
+    val newParams = new scala.Array[Any](params.length)
+    var nullType = VARCHAR
+    if (engine.name.contains("PostgreSQL") && params.exists(x => x == null || x == None)) nullType = NULL
     types.indices foreach { i =>
-      types(i) = if (null == params(i)) VARCHAR else sqlTypeMapping.sqlCode(params(i).getClass)
+      newParams(i) = params(i)
+      types(i) =
+        params(i) match
+          case null => nullType
+          case None =>
+            newParams(i) = null
+            nullType
+          case ParamValue(v, sqlType) =>
+            newParams(i) = v
+            sqlType
+          case tn: TypedNull =>
+            newParams(i) = null
+            sqlTypeMapping.sqlCode(tn.clazz)
+          case Some(v) =>
+            newParams(i) = v
+            sqlTypeMapping.sqlCode(v.getClass)
+          case v: Any => sqlTypeMapping.sqlCode(v.getClass)
     }
-    new TypeParamSetter(params, types)
+    new TypeParamSetter(newParams, types, engine.setNullAsObject)
   }
 
 }
 
-class TypeParamSetter(params: collection.Seq[Any], types: collection.Seq[Int])
-  extends (PreparedStatement => Unit) with Logging {
+class TypeParamSetter(params: collection.Seq[Any], types: collection.Seq[Int], setNullAsObject: Boolean) extends (PreparedStatement => Unit) {
   override def apply(ps: PreparedStatement): Unit = {
-    ParamSetter.setParams(ps, params, types)
+    ParamSetter.setParams(ps, params, types, 1, setNullAsObject)
   }
 }
 
 object ParamSetter extends Logging {
 
+  /** Set Parameter to statement.
+   * value is not null
+   *
+   * @param stmt
+   * @param index
+   * @param value
+   * @param sqltype
+   */
   def setParam(stmt: PreparedStatement, index: Int, value: Any, sqltype: Int): Unit = {
     try {
       sqltype match {
@@ -154,27 +181,40 @@ object ParamSetter extends Logging {
     }
   }
 
-  def setParams(stmt: PreparedStatement, params: collection.Seq[Any], types: collection.Seq[Int]): Unit = {
-    setParams(stmt, params, types, 1)
+  def setParams(stmt: PreparedStatement, params: collection.Seq[Any], types: collection.Seq[Int], setNullAsObject: Boolean): Unit = {
+    setParams(stmt, params, types, 1, setNullAsObject)
   }
 
-  def setParams(stmt: PreparedStatement, params: collection.Seq[Any], types: collection.Seq[Int], startParamIndex: Int): Unit = {
+  def setParams(stmt: PreparedStatement, params: collection.Seq[Any], types: collection.Seq[Int],
+                startParamIndex: Int, setNullAsObject: Boolean): Unit = {
     val paramsCount = if (params == null) 0 else params.length
     val stmtParamCount = types.length
     val sqltypes = types.toArray
 
     if (stmtParamCount > paramsCount)
-      throw new SQLException("Wrong number of parameters: expected " + stmtParamCount + ", was given " + paramsCount)
+      throw new SQLException(s"Wrong number of parameters: expected ${stmtParamCount}, was given ${paramsCount}")
 
     var i = 0
     while (i < stmtParamCount) {
       val index = i + startParamIndex
       if (null == params(i)) {
-        stmt.setNull(index, if (sqltypes(i) == NULL) VARCHAR else sqltypes(i))
+        setNull(stmt, index, sqltypes(i), setNullAsObject)
       } else {
         setParam(stmt, index, params(i), sqltypes(i))
       }
       i += 1
+    }
+  }
+
+  def setNull(ps: PreparedStatement, index: Int, sqlType: Int, useSetObject: Boolean): Unit = {
+    try
+      if (useSetObject) {
+        ps.setObject(index, null)
+      } else {
+        ps.setNull(index, sqlType)
+      }
+    catch {
+      case ex: SQLFeatureNotSupportedException => ps.setNull(index, Types.NULL)
     }
   }
 

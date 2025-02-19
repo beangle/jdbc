@@ -108,7 +108,7 @@ object JdbcExecutor {
 
 class JdbcExecutor(dataSource: DataSource) extends Logging {
   private val engine = Engines.forDataSource(dataSource)
-  val sqlTypeMapping = new DefaultSqlTypeMapping(engine)
+  private val sqlTypeMapping = new DefaultSqlTypeMapping(engine)
   var showSql = false
   var fetchSize = 1000
 
@@ -159,13 +159,13 @@ class JdbcExecutor(dataSource: DataSource) extends Logging {
     conn.setAutoCommit(false)
     val stmt = conn.prepareStatement(sql)
     stmt.setFetchSize(fetchSize)
-    TypeParamSetter(sqlTypeMapping, params)(stmt)
+    TypeParamSetter(engine, sqlTypeMapping, params)(stmt)
     val rs = stmt.executeQuery()
     new ResultSetIterator(rs, engine)
   }
 
   def query(sql: String, params: Any*): collection.Seq[Array[Any]] = {
-    query(sql, TypeParamSetter(sqlTypeMapping, params))
+    query(sql, TypeParamSetter(engine, sqlTypeMapping, params))
   }
 
   def query(sql: String, setter: PreparedStatement => Unit): collection.Seq[Array[Any]] = {
@@ -178,7 +178,7 @@ class JdbcExecutor(dataSource: DataSource) extends Logging {
   }
 
   def fetch(sql: String, limit: PageLimit, params: Any*): collection.Seq[Array[Any]] = {
-    fetch(sql, limit, TypeParamSetter(sqlTypeMapping, params))
+    fetch(sql, limit, TypeParamSetter(engine, sqlTypeMapping, params))
   }
 
   def fetch(sql: String, limit: PageLimit, setter: PreparedStatement => Unit): collection.Seq[Array[Any]] = {
@@ -197,7 +197,7 @@ class JdbcExecutor(dataSource: DataSource) extends Logging {
   }
 
   def update(sql: String, params: Any*): Int = {
-    update(sql, TypeParamSetter(sqlTypeMapping, params))
+    update(sql, TypeParamSetter(engine, sqlTypeMapping, params))
   }
 
   def update(sql: String, setter: PreparedStatement => Unit): Int = {
@@ -280,7 +280,7 @@ class JdbcExecutor(dataSource: DataSource) extends Logging {
               for (j <- 0 until radix) {
                 val param = iter.next()
                 curParam = param
-                ParamSetter.setParams(stmt, param, types, (types.length * j) + 1)
+                ParamSetter.setParams(stmt, param, types, (types.length * j) + 1, engine.setNullAsObject)
               }
               stmt.addBatch()
             }
@@ -333,7 +333,7 @@ class JdbcExecutor(dataSource: DataSource) extends Logging {
       stmt = conn.prepareStatement(sql)
       for (param <- datas) {
         curParam = param
-        ParamSetter.setParams(stmt, param, types)
+        ParamSetter.setParams(stmt, param, types, engine.setNullAsObject)
         stmt.addBatch()
       }
       rows ++= stmt.executeBatch()

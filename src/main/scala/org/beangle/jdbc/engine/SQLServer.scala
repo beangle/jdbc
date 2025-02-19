@@ -123,6 +123,8 @@ class SQLServer2005 extends AbstractEngine {
 
   override def supportBoolean: Boolean = false
 
+  override def setNullAsObject: Boolean = true
+
   functions { f =>
     f.currentDate = "convert(date,getdate())"
     f.localTime = "convert(time,getdate())"

@@ -61,6 +61,8 @@ trait Dialect {
   def supportSequence: Boolean
 
   def supportMultiValueInsert: Boolean
+
+  def setNullAsObject: Boolean
 }
 
 trait AlterTableDialect(val table: Table) {
