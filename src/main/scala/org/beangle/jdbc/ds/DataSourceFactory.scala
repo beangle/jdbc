@@ -24,7 +24,7 @@ import org.beangle.commons.net.http.HttpUtils
 import org.beangle.jdbc.ds.DataSourceUtils.parseXml
 
 import java.io.{ByteArrayInputStream, InputStream}
-import java.net.{URI, URL}
+import java.net.URI
 import javax.sql.DataSource
 
 object DataSourceFactory {
@@ -66,10 +66,8 @@ class DataSourceFactory extends Factory[DataSource] with Initializing with Dispo
     try {
       if (null != url) {
         if (url.startsWith("jdbc:")) {
-          if (null == driver) {
-            driver = Strings.substringBetween(url, "jdbc:", ":")
-            props.put("url", url)
-          }
+          if null == driver then driver = Strings.substringBetween(url, "jdbc:", ":")
+          if !props.contains("url") then props.put("url", url)
         } else if (url.startsWith("http")) {
           val res = HttpUtils.getText(url)
           if res.isOk then merge(readConf(new ByteArrayInputStream(res.getText.getBytes)))
