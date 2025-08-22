@@ -366,7 +366,7 @@ class MetadataLoader(meta: DatabaseMetaData, engine: Engine) extends Logging {
         statement = meta.getConnection.createStatement()
         rs = statement.executeQuery(sql)
         if (rs.next()) {
-          val values = JdbcExecutor.convert(rs, JdbcExecutor.getColumnTypes(rs, engine))
+          val values = JdbcExecutor.extract(rs, JdbcExecutor.getColumnTypes(rs, engine))
           if (values.nonEmpty && null != values(0)) {
             var dfn = values(0).toString.trim()
             if !dfn.toLowerCase.startsWith("create ") then

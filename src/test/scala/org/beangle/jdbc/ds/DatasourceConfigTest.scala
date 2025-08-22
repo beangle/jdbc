@@ -18,8 +18,8 @@
 package org.beangle.jdbc.ds
 
 import org.beangle.commons.lang.ClassLoaders
-import org.scalatest.matchers.should.Matchers
 import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
 import scala.xml.XML
 

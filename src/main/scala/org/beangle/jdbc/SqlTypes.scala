@@ -21,5 +21,5 @@ package org.beangle.jdbc
  */
 object SqlTypes {
 
-  var JSON = 3001
+  val JSON = 3001
 }

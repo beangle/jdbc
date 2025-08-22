@@ -19,9 +19,11 @@ package org.beangle.jdbc.query
 
 import org.beangle.commons.conversion.string.BooleanConverter
 import org.beangle.commons.io.IOs
+import org.beangle.commons.json.Json
+import org.beangle.commons.lang.Charsets
 import org.beangle.commons.logging.Logging
-import org.beangle.jdbc.SqlTypeMapping
 import org.beangle.jdbc.engine.Engine
+import org.beangle.jdbc.{SqlTypeMapping, SqlTypes}
 
 import java.io.*
 import java.math.BigDecimal
@@ -55,14 +57,14 @@ object TypeParamSetter {
             sqlTypeMapping.sqlCode(v.getClass)
           case v: Any => sqlTypeMapping.sqlCode(v.getClass)
     }
-    new TypeParamSetter(newParams, types, engine.setNullAsObject)
+    new TypeParamSetter(engine, newParams, types)
   }
 
 }
 
-class TypeParamSetter(params: collection.Seq[Any], types: collection.Seq[Int], setNullAsObject: Boolean) extends (PreparedStatement => Unit) {
+class TypeParamSetter(engine: Engine, params: collection.Seq[Any], types: collection.Seq[Int]) extends (PreparedStatement => Unit) {
   override def apply(ps: PreparedStatement): Unit = {
-    ParamSetter.setParams(ps, params, types, 1, setNullAsObject)
+    ParamSetter.setParams(engine, ps, params, types, 1)
   }
 }
 
@@ -71,12 +73,12 @@ object ParamSetter extends Logging {
   /** Set Parameter to statement.
    * value is not null
    *
-   * @param stmt
-   * @param index
-   * @param value
-   * @param sqltype
+   * @param stmt    prepared statement
+   * @param index   index from 1
+   * @param value   value not null
+   * @param sqltype standard sql type
    */
-  def setParam(stmt: PreparedStatement, index: Int, value: Any, sqltype: Int): Unit = {
+  def setParam(engine: Engine, stmt: PreparedStatement, index: Int, value: Any, sqltype: Int): Unit = {
     try {
       sqltype match {
         case CHAR | VARCHAR | NVARCHAR =>
@@ -174,6 +176,16 @@ object ParamSetter extends Logging {
             case blob: Blob => blob.getBinaryStream
           }
           stmt.setBinaryStream(index, in)
+        case SqlTypes.JSON =>
+          val str = value match {
+            case s: String => s
+            case j: Json => j.toJson
+          }
+          if (engine.setJsonAsBytes) {
+            stmt.setBytes(index, str.getBytes(Charsets.UTF_8))
+          } else {
+            stmt.setString(index, str)
+          }
         case _ => if (0 == sqltype) stmt.setObject(index, value) else stmt.setObject(index, value, sqltype)
       }
     } catch {
@@ -181,12 +193,12 @@ object ParamSetter extends Logging {
     }
   }
 
-  def setParams(stmt: PreparedStatement, params: collection.Seq[Any], types: collection.Seq[Int], setNullAsObject: Boolean): Unit = {
-    setParams(stmt, params, types, 1, setNullAsObject)
+  def setParams(engine: Engine, stmt: PreparedStatement, params: collection.Seq[Any], types: collection.Seq[Int]): Unit = {
+    setParams(engine, stmt, params, types, 1)
   }
 
-  def setParams(stmt: PreparedStatement, params: collection.Seq[Any], types: collection.Seq[Int],
-                startParamIndex: Int, setNullAsObject: Boolean): Unit = {
+  def setParams(engine: Engine, stmt: PreparedStatement, params: collection.Seq[Any], types: collection.Seq[Int],
+                startParamIndex: Int): Unit = {
     val paramsCount = if (params == null) 0 else params.length
     val stmtParamCount = types.length
     val sqltypes = types.toArray
@@ -195,12 +207,13 @@ object ParamSetter extends Logging {
       throw new SQLException(s"Wrong number of parameters: expected ${stmtParamCount}, was given ${paramsCount}")
 
     var i = 0
+    val setNullAsObject = engine.setNullAsObject
     while (i < stmtParamCount) {
       val index = i + startParamIndex
       if (null == params(i)) {
         setNull(stmt, index, sqltypes(i), setNullAsObject)
       } else {
-        setParam(stmt, index, params(i), sqltypes(i))
+        setParam(engine, stmt, index, params(i), sqltypes(i))
       }
       i += 1
     }

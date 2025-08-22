@@ -193,6 +193,10 @@ trait AbstractDialect extends Dialect {
   override def supportMultiValueInsert: Boolean = false
 
   override def setNullAsObject: Boolean = false
+
+  override def supportJsonType: Boolean = false
+
+  override def setJsonAsBytes: Boolean = false
 }
 
 class DefaultAlterTableDialect(table: Table, options: Options) extends AlterTableDialect(table) {

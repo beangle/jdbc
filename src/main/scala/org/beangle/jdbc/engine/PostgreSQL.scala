@@ -110,4 +110,6 @@ class PostgreSQL10 extends AbstractEngine {
   override def systemSchemas: Seq[String] = List("information_schema", "pg_catalog")
 
   override def supportMultiValueInsert: Boolean = true
+
+  override def supportJsonType: Boolean = true
 }

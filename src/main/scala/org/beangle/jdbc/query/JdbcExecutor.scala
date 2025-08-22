@@ -22,9 +22,9 @@ import org.beangle.commons.collection.page.PageLimit
 import org.beangle.commons.io.{IOs, StringBuilderWriter}
 import org.beangle.commons.lang.Strings
 import org.beangle.commons.logging.Logging
-import org.beangle.jdbc.DefaultSqlTypeMapping
 import org.beangle.jdbc.engine.{Engine, Engines}
 import org.beangle.jdbc.meta.SqlType
+import org.beangle.jdbc.{DefaultSqlTypeMapping, SqlTypes}
 
 import java.sql.Types.*
 import java.sql.{BatchUpdateException, Connection, PreparedStatement, ResultSet, SQLException, Types}
@@ -34,7 +34,13 @@ import scala.Array
 object JdbcExecutor {
   private val NoTextTypes = Set(BINARY, VARBINARY, LONGVARBINARY, ARRAY, BLOB, CLOB, NCLOB, JAVA_OBJECT)
 
-  def convert(rs: ResultSet, types: Array[Int]): Array[Any] = {
+  /** Extract values from result set by type hint.
+   *
+   * @param rs    result set
+   * @param types java.sql.Types value array
+   * @return
+   */
+  def extract(rs: ResultSet, types: Array[Int]): Array[Any] = {
     val objs = Array.ofDim[Any](types.length)
     types.indices foreach { i =>
       objs(i) = types(i) match {
@@ -54,6 +60,7 @@ object JdbcExecutor {
             val sw = new StringBuilderWriter(16)
             IOs.copy(r, sw)
             sw.toString
+        case SqlTypes.JSON => rs.getString(i + 1)
         case _ => rs.getObject(i + 1)
       }
     }
@@ -280,7 +287,7 @@ class JdbcExecutor(dataSource: DataSource) extends Logging {
               for (j <- 0 until radix) {
                 val param = iter.next()
                 curParam = param
-                ParamSetter.setParams(stmt, param, types, (types.length * j) + 1, engine.setNullAsObject)
+                ParamSetter.setParams(engine, stmt, param, types, (types.length * j) + 1)
               }
               stmt.addBatch()
             }
@@ -333,7 +340,7 @@ class JdbcExecutor(dataSource: DataSource) extends Logging {
       stmt = conn.prepareStatement(sql)
       for (param <- datas) {
         curParam = param
-        ParamSetter.setParams(stmt, param, types, engine.setNullAsObject)
+        ParamSetter.setParams(engine, stmt, param, types)
         stmt.addBatch()
       }
       rows ++= stmt.executeBatch()

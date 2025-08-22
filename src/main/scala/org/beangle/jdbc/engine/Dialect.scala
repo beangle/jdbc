@@ -63,6 +63,10 @@ trait Dialect {
   def supportMultiValueInsert: Boolean
 
   def setNullAsObject: Boolean
+
+  def supportJsonType: Boolean
+
+  def setJsonAsBytes: Boolean
 }
 
 trait AlterTableDialect(val table: Table) {

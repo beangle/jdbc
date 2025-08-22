@@ -119,4 +119,6 @@ class MySQL5 extends AbstractEngine {
   override def version: Version = Version("[5.5,)")
 
   override def supportMultiValueInsert: Boolean = true
+
+  override def supportJsonType: Boolean = true
 }

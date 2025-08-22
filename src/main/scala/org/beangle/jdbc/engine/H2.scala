@@ -88,4 +88,8 @@ class H2 extends AbstractEngine {
   override def name: String = "H2"
 
   override def version: Version = Version("[2.1,)")
+
+  override def supportJsonType: Boolean = true
+
+  override def setJsonAsBytes: Boolean = true
 }

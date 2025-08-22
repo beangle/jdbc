@@ -38,7 +38,7 @@ class ResultSetIterator(rs: ResultSet, engine: Engine) extends Iterator[Array[An
 
   private def readNext(): Unit = {
     if (rs.next()) {
-      nextRecord = JdbcExecutor.convert(rs, types)
+      nextRecord = JdbcExecutor.extract(rs, types)
     } else {
       nextRecord = null
       close()
