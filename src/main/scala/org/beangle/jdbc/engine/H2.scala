@@ -17,6 +17,8 @@
 
 package org.beangle.jdbc.engine
 
+import org.beangle.jdbc.SqlTypes.*
+
 import java.sql.Types.*
 
 class H2 extends AbstractEngine {
@@ -32,7 +34,7 @@ class H2 extends AbstractEngine {
     DATE -> "date", TIME -> "time", TIMESTAMP -> "timestamp", TIMESTAMP_WITH_TIMEZONE -> "timestamp with time zone",
     BINARY -> "binary($l)", VARBINARY -> "varbinary($l)", LONGVARBINARY -> "longvarbinary",
     BLOB -> "blob", CLOB -> "clob", NCLOB -> "nclob",
-    JAVA_OBJECT -> "json")
+    JAVA_OBJECT -> "json", JSON -> "json")
 
   registerTypes2(
     (VARCHAR, 1_000_000_00, "varchar($l)"), (VARCHAR, Int.MaxValue, "character large object"),

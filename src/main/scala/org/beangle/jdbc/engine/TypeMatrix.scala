@@ -39,14 +39,16 @@ object TypeMatrix {
   }
 
   def printTypeMatrix(): Unit = {
+    import org.beangle.jdbc.SqlTypes.*
+
     import java.sql.Types.*
     val types = Array(BOOLEAN, BIT, CHAR, NCHAR, TINYINT, SMALLINT, INTEGER, BIGINT, FLOAT, REAL, DOUBLE, DECIMAL, NUMERIC,
       DATE, TIME, TIMESTAMP, TIMESTAMP_WITH_TIMEZONE, VARCHAR, NVARCHAR, LONGVARCHAR, LONGNVARCHAR, BINARY, VARBINARY,
-      LONGVARBINARY, BLOB, CLOB, NCLOB)
+      LONGVARBINARY, BLOB, CLOB, NCLOB, JSON)
 
     val typeNames = Array("BOOLEAN", "BIT", "CHAR", "NCHAR", "TINYINT", "SMALLINT", "INTEGER", "BIGINT",
       "FLOAT", "REAL", "DOUBLE", "DECIMAL", "NUMERIC", "DATE", "TIME", "TIMESTAMP", "TIMESTAMPTZ", "VARCHAR", "NVARCHAR",
-      "LONGVARCHAR", "LONGNVARCHAR", "BINARY", "VARBINARY", "LONGVARBINARY", "BLOB", "CLOB", "NCLOB")
+      "LONGVARCHAR", "LONGNVARCHAR", "BINARY", "VARBINARY", "LONGVARBINARY", "BLOB", "CLOB", "NCLOB", "JSON")
 
     val engines = Array(new PostgreSQL10, new H2, new MySQL5,
       new Oracle10g, new SQLServer2008, new DB2V8)

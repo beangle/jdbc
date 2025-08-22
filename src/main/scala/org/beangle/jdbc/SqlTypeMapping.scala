@@ -17,7 +17,8 @@
 
 package org.beangle.jdbc
 
-import org.beangle.commons.lang.{Enums, Strings}
+import org.beangle.commons.json.{Json, JsonArray, JsonObject}
+import org.beangle.commons.lang.Enums
 import org.beangle.commons.lang.annotation.value
 import org.beangle.commons.lang.time.{HourMinute, WeekState}
 import org.beangle.jdbc.engine.Engine
@@ -87,7 +88,12 @@ class DefaultSqlTypeMapping(engine: Engine) extends SqlTypeMapping {
 
     (classOf[java.sql.Clob], CLOB),
     (classOf[java.sql.Blob], BLOB),
-    (classOf[Array[Byte]], VARBINARY))
+    (classOf[Array[Byte]], VARBINARY),
+
+    (classOf[Json], SqlTypes.JSON),
+    (classOf[JsonObject], SqlTypes.JSON),
+    (classOf[JsonArray], SqlTypes.JSON),
+  )
 
   private val generalTypes: Map[Class[_], Int] = Map(
     (classOf[java.util.Date], TIMESTAMP),

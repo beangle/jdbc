@@ -17,6 +17,8 @@
 
 package org.beangle.jdbc.engine
 
+import org.beangle.jdbc.SqlTypes.*
+
 import java.sql.Types
 import java.sql.Types.*
 
@@ -33,7 +35,7 @@ class PostgreSQL10 extends AbstractEngine {
     DATE -> "date", TIME -> "time", TIMESTAMP -> "timestamp", TIMESTAMP_WITH_TIMEZONE -> "timestamptz",
     BINARY -> "bytea", VARBINARY -> "bytea", LONGVARBINARY -> "bytea",
     BLOB -> "bytea", CLOB -> "text", NCLOB -> "text",
-    JAVA_OBJECT -> "json")
+    JAVA_OBJECT -> "jsonb", JSON -> "jsonb")
 
   registerTypes2(
     (VARCHAR, 50000, "varchar($l)"),

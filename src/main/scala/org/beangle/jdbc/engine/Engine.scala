@@ -28,7 +28,7 @@ object Engine {
   val reservedWords: Set[String] = loadKeywords("sql-reserved.txt")
 
   def loadKeywords(resourceName: String): Set[String] = {
-    val uri = "org/beangle/data/jdbc/engine/" + resourceName
+    val uri = "org/beangle/jdbc/engine/keywords/" + resourceName
     val lines = IOs.readLines(ClassLoaders.getResourceAsStream(uri).get)
     val keys = Collections.newSet[String]
     lines foreach { line =>

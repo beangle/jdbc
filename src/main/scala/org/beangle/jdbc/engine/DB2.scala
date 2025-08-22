@@ -17,6 +17,8 @@
 
 package org.beangle.jdbc.engine
 
+import org.beangle.jdbc.SqlTypes.*
+
 import java.sql.Types.*
 
 class DB2V8 extends AbstractEngine {
@@ -35,7 +37,8 @@ class DB2V8 extends AbstractEngine {
     BINARY -> "varchar($l) for bit data",
     VARBINARY -> "varchar($l) for bit data",
     LONGVARBINARY -> "long varchar for bit data",
-    BLOB -> "blob($l)", CLOB -> "clob($l)", NCLOB -> "clob($l)")
+    BLOB -> "blob($l)", CLOB -> "clob($l)", NCLOB -> "clob($l)",
+    JSON -> "varchar($l)")
 
   options.sequence { s =>
     s.nextValSql = "values nextval for {name}"
@@ -88,7 +91,7 @@ class DB2V8 extends AbstractEngine {
 
   override def name: String = "DB2"
 
-  override def systemSchemas: Seq[String] = List("SYS","SYSIBM","SYSTOOLS","SYSCAT", "SYSSTAT")
+  override def systemSchemas: Seq[String] = List("SYS", "SYSIBM", "SYSTOOLS", "SYSCAT", "SYSSTAT")
 
   override def supportBoolean: Boolean = false
 }

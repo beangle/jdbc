@@ -18,6 +18,7 @@
 package org.beangle.jdbc.engine
 
 import org.beangle.commons.lang.Strings
+import org.beangle.jdbc.SqlTypes.*
 import org.beangle.jdbc.meta.{Index, Table}
 
 import java.sql.Types.*
@@ -35,7 +36,7 @@ class MySQL5 extends AbstractEngine {
     DATE -> "date", TIME -> "time", TIMESTAMP -> "datetime", TIMESTAMP_WITH_TIMEZONE -> "timestamp",
     BINARY -> "binary($l)", VARBINARY -> "longblob", LONGVARBINARY -> "longblob",
     BLOB -> "longblob", CLOB -> "longtext", NCLOB -> "longtext",
-    JAVA_OBJECT -> "json")
+    JAVA_OBJECT -> "json", JSON -> "json")
 
   registerTypes2(
     (VARCHAR, 500, "varchar($l)"),

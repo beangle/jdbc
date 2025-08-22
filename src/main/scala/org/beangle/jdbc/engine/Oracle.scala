@@ -17,6 +17,8 @@
 
 package org.beangle.jdbc.engine
 
+import org.beangle.jdbc.SqlTypes.*
+
 import java.sql.Types
 import java.sql.Types.*
 import scala.collection.mutable
@@ -34,7 +36,7 @@ class Oracle10g extends AbstractEngine {
     DATE -> "date", TIME -> "date", TIMESTAMP -> "date", TIMESTAMP_WITH_TIMEZONE -> "timestamp with time zone",
     BINARY -> "raw", VARBINARY -> "long raw", LONGVARBINARY -> "long raw",
     BLOB -> "blob", CLOB -> "clob", NCLOB -> "nclob",
-    JAVA_OBJECT -> "blob")
+    JAVA_OBJECT -> "blob", JSON -> "varchar2($l)")
 
   registerTypes2(
     (VARCHAR, 4000, "varchar2($l)"), (VARCHAR, 2 * 1024 * 1024 * 1024, "clob"), (NUMERIC, 38, "number($p,$s)"),

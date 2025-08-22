@@ -17,8 +17,8 @@
 
 package org.beangle.jdbc.engine
 
-import org.beangle.commons.lang.Strings
-import org.beangle.jdbc.meta.{Column, Index, Table}
+import org.beangle.jdbc.SqlTypes.*
+import org.beangle.jdbc.meta.Index
 
 import java.sql.Types.*
 
@@ -36,7 +36,7 @@ class SQLServer2005 extends AbstractEngine {
     DATE -> "date", TIME -> "time", TIMESTAMP -> "datetime2", TIMESTAMP_WITH_TIMEZONE -> "datetimeoffset",
     BINARY -> "binary", VARBINARY -> "varbinary(MAX)", LONGVARBINARY -> "varbinary(MAX)",
     BLOB -> "varbinary(MAX)", CLOB -> "varchar(MAX)", NCLOB -> "ntext",
-    JAVA_OBJECT -> "nvarchar(MAX)")
+    JAVA_OBJECT -> "nvarchar(MAX)", JSON -> "nvarchar(MAX)")
 
   registerTypes2(
     (VARCHAR, 8000, "varchar($l)"),
