@@ -38,6 +38,7 @@ object TypeParamSetter {
     val newParams = new scala.Array[Any](params.length)
     var nullType = VARCHAR
     if (engine.name.contains("PostgreSQL") && params.exists(x => x == null || x == None)) nullType = NULL
+    //从值推测类型
     types.indices foreach { i =>
       newParams(i) = params(i)
       types(i) =
@@ -181,11 +182,7 @@ object ParamSetter extends Logging {
             case s: String => s
             case j: Json => j.toJson
           }
-          if (engine.setJsonAsBytes) {
-            stmt.setBytes(index, str.getBytes(Charsets.UTF_8))
-          } else {
-            stmt.setString(index, str)
-          }
+          stmt.setObject(index, engine.mkJsonObject(str), Types.OTHER)
         case _ => if (0 == sqltype) stmt.setObject(index, value) else stmt.setObject(index, value, sqltype)
       }
     } catch {

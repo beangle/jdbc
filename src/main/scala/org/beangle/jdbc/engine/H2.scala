@@ -17,6 +17,7 @@
 
 package org.beangle.jdbc.engine
 
+import org.beangle.commons.lang.Charsets
 import org.beangle.jdbc.SqlTypes.*
 
 import java.sql.Types.*
@@ -91,5 +92,7 @@ class H2 extends AbstractEngine {
 
   override def supportJsonType: Boolean = true
 
-  override def setJsonAsBytes: Boolean = true
+  override def mkJsonObject(s: String): Object = {
+    if (null == s) then s else s.getBytes(Charsets.UTF_8)
+  }
 }

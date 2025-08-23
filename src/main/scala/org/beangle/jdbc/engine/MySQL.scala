@@ -17,7 +17,7 @@
 
 package org.beangle.jdbc.engine
 
-import org.beangle.commons.lang.Strings
+import org.beangle.commons.lang.{Charsets, Strings}
 import org.beangle.jdbc.SqlTypes.*
 import org.beangle.jdbc.meta.{Index, Table}
 
@@ -119,6 +119,4 @@ class MySQL5 extends AbstractEngine {
   override def version: Version = Version("[5.5,)")
 
   override def supportMultiValueInsert: Boolean = true
-
-  override def supportJsonType: Boolean = true
 }

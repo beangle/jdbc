@@ -196,7 +196,7 @@ trait AbstractDialect extends Dialect {
 
   override def supportJsonType: Boolean = false
 
-  override def setJsonAsBytes: Boolean = false
+  override def mkJsonObject(s: String): Object = s
 }
 
 class DefaultAlterTableDialect(table: Table, options: Options) extends AlterTableDialect(table) {

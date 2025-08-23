@@ -66,7 +66,7 @@ trait Dialect {
 
   def supportJsonType: Boolean
 
-  def setJsonAsBytes: Boolean
+  def mkJsonObject(str:String): Object
 }
 
 trait AlterTableDialect(val table: Table) {

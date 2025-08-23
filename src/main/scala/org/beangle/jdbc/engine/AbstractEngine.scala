@@ -17,6 +17,7 @@
 
 package org.beangle.jdbc.engine
 
+import org.beangle.jdbc.SqlTypes
 import org.beangle.jdbc.meta.{MetadataLoadSql, SqlType}
 
 import java.sql.Types
@@ -85,7 +86,7 @@ abstract class AbstractEngine extends Engine, AbstractDialect {
 
   override def resolveCode(typeCode: Int, precision: Option[Int], typeName: Option[String]): Int = {
     precision match
-      case None => convertBoolean(typeCode)
+      case None => convertType(typeCode, typeName)
       case Some(p) =>
         typeCode match {
           case Types.DECIMAL | Types.NUMERIC =>
@@ -96,13 +97,18 @@ abstract class AbstractEngine extends Engine, AbstractDialect {
               case 19 => Types.BIGINT
               case _ => typeCode
             }
-          case _ => convertBoolean(typeCode)
+          case _ => convertType(typeCode, typeName)
         }
   }
 
-  private def convertBoolean(typeCode: Int): Int = {
+  private def convertType(typeCode: Int, typeName: Option[String]): Int = {
     typeCode match {
       case Types.BIT | Types.BOOLEAN => if supportBoolean then Types.BOOLEAN else Types.NUMERIC
+      case Types.OTHER =>
+        typeName match {
+          case None => typeCode
+          case Some(tn) => if tn.toLowerCase.contains("json") then SqlTypes.JSON else typeCode
+        }
       case _ => typeCode
     }
   }
