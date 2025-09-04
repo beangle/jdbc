@@ -114,8 +114,9 @@ object JdbcExecutor {
 }
 
 class JdbcExecutor(dataSource: DataSource) extends Logging {
-  private val engine = Engines.forDataSource(dataSource)
   private val sqlTypeMapping = new DefaultSqlTypeMapping(engine)
+
+  val engine: Engine = Engines.forDataSource(dataSource)
   var showSql = false
   var fetchSize = 1000
 
@@ -229,6 +230,27 @@ class JdbcExecutor(dataSource: DataSource) extends Logging {
       conn.close()
     }
     rows
+  }
+
+  /** 设置一个参数值
+   *
+   * @param stmt
+   * @param index
+   * @param value
+   * @param sqltype
+   */
+  def setParam(stmt: PreparedStatement, index: Int, value: Any, sqltype: Int): Unit = {
+    ParamSetter.setParam(engine, stmt, index, value, sqltype)
+  }
+
+  /** 设置一组参数值
+   *
+   * @param stmt
+   * @param params
+   * @param types
+   */
+  def setParams(stmt: PreparedStatement, params: collection.Seq[Any], types: collection.Seq[Int]): Unit = {
+    ParamSetter.setParams(engine, stmt, params, types, 1)
   }
 
   private def postgreCopy(sql: String, datas: collection.Seq[Array[_]], types: collection.Seq[Int]): Unit = {
