@@ -250,7 +250,7 @@ class MetadataLoader(meta: DatabaseMetaData, engine: Engine) extends Logging {
             scale = 5
             length = 19
           }
-          val typecode = engine.resolveCode(datatype, Some(length), Some(typename))
+          val typecode = engine.resolveCode(datatype, Some(length), Some(scale), Some(typename))
           val key = s"$typecode-$typename-$length-$scale"
           val sqlType = types.getOrElseUpdate(key, engine.toType(typecode, length, scale))
           val nullable = "yes".equalsIgnoreCase(rs.getString(IsNullable))

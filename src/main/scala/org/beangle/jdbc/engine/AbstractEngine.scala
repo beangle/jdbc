@@ -75,7 +75,7 @@ abstract class AbstractEngine extends Engine, AbstractDialect {
   }
 
   override def toType(sqlCode: Int, precision: Int, scale: Int): SqlType = {
-    val targetCode = resolveCode(sqlCode, Some(precision), None)
+    val targetCode = resolveCode(sqlCode, Some(precision), Some(scale), None)
     if (precision == 0) {
       val p = if sqlCode == Types.BOOLEAN || sqlCode == Types.BIT then 1 else precision
       typeNames.toType(targetCode, p, scale)
@@ -84,18 +84,22 @@ abstract class AbstractEngine extends Engine, AbstractDialect {
     }
   }
 
-  override def resolveCode(typeCode: Int, precision: Option[Int], typeName: Option[String]): Int = {
+  override def resolveCode(typeCode: Int, precision: Option[Int], scale: Option[Int], typeName: Option[String]): Int = {
     precision match
       case None => convertType(typeCode, typeName)
       case Some(p) =>
         typeCode match {
           case Types.DECIMAL | Types.NUMERIC =>
-            p match {
-              case 1 => if supportBoolean then Types.BOOLEAN else typeCode
-              case 5 => Types.SMALLINT
-              case 10 => Types.INTEGER
-              case 19 => Types.BIGINT
-              case _ => typeCode
+            if (scale.getOrElse(0) == 0) {
+              p match {
+                case 1 => if supportBoolean then Types.BOOLEAN else typeCode
+                case 5 => Types.SMALLINT
+                case 10 => Types.INTEGER
+                case 19 => Types.BIGINT
+                case _ => typeCode
+              }
+            } else {
+              typeCode
             }
           case _ => convertType(typeCode, typeName)
         }

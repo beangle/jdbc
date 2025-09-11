@@ -74,4 +74,9 @@ class PostgreSQLTest extends AnyFlatSpec with Matchers {
     ot.precision shouldEqual Some(1)
     ot.code shouldEqual Types.NUMERIC
   }
+
+  "convert numeric with scale" should "be ok" in {
+    val n = engine.toType(Types.NUMERIC, 10, 2)
+    assert(n.name == "numeric(10,2)")
+  }
 }

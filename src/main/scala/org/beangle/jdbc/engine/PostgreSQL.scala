@@ -40,8 +40,8 @@ class PostgreSQL10 extends AbstractEngine {
   registerTypes2(
     (VARCHAR, 50000, "varchar($l)"),
     (VARCHAR, Int.MaxValue, "text"),
-    (NUMERIC, 1000, "numeric($p, $s)"),
-    (NUMERIC, Int.MaxValue, "numeric(1000, $s)"))
+    (NUMERIC, 1000, "numeric($p,$s)"),
+    (NUMERIC, Int.MaxValue, "numeric(1000,$s)"))
 
   options.sequence { s =>
     s.nextValSql = "select nextval ('{name}')"
@@ -97,13 +97,13 @@ class PostgreSQL10 extends AbstractEngine {
 
   override def version: Version = Version("[10.0,)")
 
-  override def resolveCode(typeCode: Int, precision: Option[Int], typeName: Option[String]): Int = {
+  override def resolveCode(typeCode: Int, precision: Option[Int], scale: Option[Int], typeName: Option[String]): Int = {
     typeCode match {
       case TIMESTAMP =>
         if typeName.nonEmpty && typeName.get.toLowerCase == "timestamptz" then TIMESTAMP_WITH_TIMEZONE
         else TIMESTAMP
       case BLOB => VARBINARY
-      case _ => super.resolveCode(typeCode, precision, typeName)
+      case _ => super.resolveCode(typeCode, precision, scale, typeName)
     }
   }
 
