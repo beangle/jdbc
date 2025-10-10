@@ -141,10 +141,10 @@ class Oracle10g extends AbstractEngine {
 
   override def version: Version = Version("[10.1,)")
 
-  override def resolveCode(typeCode: Int, precision: Option[Int], typeName: Option[String]): Int = {
+  override def resolveCode(typeCode: Int, precision: Option[Int], scale: Option[Int], typeName: Option[String]): Int = {
     typeCode match {
       case -101 | -102 => Types.TIMESTAMP_WITH_TIMEZONE
-      case _ => super.resolveCode(typeCode, precision, typeName)
+      case _ => super.resolveCode(typeCode, precision, scale, typeName)
     }
   }
 

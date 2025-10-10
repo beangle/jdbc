@@ -32,7 +32,7 @@ class Parser {
       while (tails.nonEmpty && iter.hasNext) {
         val tail = iter.next()
         if (line.endsWith(tail)) {
-          if (tail.length > 0) buf += substringBeforeLast(stateBuf.mkString, tail)
+          if (tail.nonEmpty) buf += substringBeforeLast(stateBuf.mkString, tail)
           else buf += stateBuf.mkString
           stateBuf.clear()
           tails = List.empty
