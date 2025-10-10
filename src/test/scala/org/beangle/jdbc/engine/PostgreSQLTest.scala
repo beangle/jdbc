@@ -24,7 +24,7 @@ import org.scalatest.matchers.should.Matchers
 import java.sql.Types
 import java.sql.Types.{BIGINT, INTEGER, SMALLINT}
 
-class PostgreSQLTest extends AnyFlatSpec with Matchers {
+class PostgreSQLTest extends AnyFlatSpec, Matchers {
 
   val engine = new PostgreSQL10
 
@@ -40,7 +40,7 @@ class PostgreSQLTest extends AnyFlatSpec with Matchers {
   "big number (size >=65535) in postgresql " should " trip to less 1000 size" in {
     val scale = 0
     val precision = 65535
-    engine.toType(Types.NUMERIC, precision, scale).name equals "numeric(1000, 0)" should be(true)
+    engine.toType(Types.NUMERIC, precision, scale).name equals "numeric(1000,0)" should be(true)
     engine.toType(Types.DECIMAL, 1, 0).name shouldEqual "boolean"
     engine.toType(Types.BLOB, 10000, 0).name shouldEqual "bytea"
 
@@ -76,7 +76,10 @@ class PostgreSQLTest extends AnyFlatSpec with Matchers {
   }
 
   "convert numeric with scale" should "be ok" in {
-    val n = engine.toType(Types.NUMERIC, 10, 2)
+    val n = engine.toType(Types.DECIMAL, 10, 2)
     assert(n.name == "numeric(10,2)")
+
+    val n2 = engine.toType(Types.NUMERIC, 10, 2)
+    assert(n2.name == "numeric(10,2)")
   }
 }
