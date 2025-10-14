@@ -18,6 +18,7 @@
 package org.beangle.jdbc.engine
 
 import org.beangle.jdbc.SqlTypes.*
+import org.beangle.jdbc.meta.TableType
 
 import java.sql.Types
 import java.sql.Types.*
@@ -177,4 +178,11 @@ class Oracle12c extends Oracle10g {
   override def maxIdentifierLength: Int = 128
 
   override def version: Version = Version("[12.2,)")
+
+  protected override def createTableOptions(tableType: TableType): (String, String) = {
+    tableType match {
+      case TableType.InMemory => ("", "INMEMORY")
+      case _ => super.createTableOptions(tableType)
+    }
+  }
 }

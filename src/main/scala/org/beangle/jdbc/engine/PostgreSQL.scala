@@ -18,6 +18,7 @@
 package org.beangle.jdbc.engine
 
 import org.beangle.jdbc.SqlTypes.*
+import org.beangle.jdbc.meta.TableType
 
 import java.sql.Types
 import java.sql.Types.*
@@ -112,4 +113,12 @@ class PostgreSQL10 extends AbstractEngine {
   override def supportMultiValueInsert: Boolean = true
 
   override def supportJsonType: Boolean = true
+
+  protected override def createTableOptions(tableType: TableType): (String, String) = {
+    tableType match {
+      case TableType.Unlogged => ("unlogged", "")
+      case TableType.InMemory => ("unlogged", "")
+      case _=> super.createTableOptions(tableType)
+    }
+  }
 }

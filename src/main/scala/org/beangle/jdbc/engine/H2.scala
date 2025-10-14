@@ -19,6 +19,7 @@ package org.beangle.jdbc.engine
 
 import org.beangle.commons.lang.Charsets
 import org.beangle.jdbc.SqlTypes.*
+import org.beangle.jdbc.meta.TableType
 
 import java.sql.Types.*
 
@@ -94,5 +95,12 @@ class H2 extends AbstractEngine {
 
   override def mkJsonObject(s: String): Object = {
     if (null == s) then s else s.getBytes(Charsets.UTF_8)
+  }
+
+  protected override def createTableOptions(tableType: TableType): (String, String) = {
+    tableType match {
+      case TableType.InMemory => ("memory", "")
+      case _ => super.createTableOptions(tableType)
+    }
   }
 }

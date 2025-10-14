@@ -18,7 +18,8 @@
 package org.beangle.jdbc.engine
 
 import org.beangle.jdbc.SqlTypes.*
-import org.beangle.jdbc.meta.Index
+import org.beangle.jdbc.meta.TableType.Temporary
+import org.beangle.jdbc.meta.{Index, TableType}
 
 import java.sql.Types.*
 
@@ -152,4 +153,12 @@ class SQLServer2012 extends SQLServer2005 {
   }
 
   override def version: Version = Version("[11,)")
+
+  protected override def createTableOptions(tableType: TableType): (String, String) = {
+    tableType match {
+      case TableType.Temporary => ("", "")
+      case TableType.InMemory => ("", "WITH (MEMORY_OPTIMIZED = ON, DURABILITY = SCHEMA_AND_DATA)")
+      case _ => super.createTableOptions(tableType)
+    }
+  }
 }

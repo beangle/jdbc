@@ -41,7 +41,9 @@ object Table {
 
 class Table(s: Schema, n: Identifier) extends Relation(s, n) {
   /** 虚拟表 */
-  var phantom: Boolean = _
+  var phantom: Boolean = false
+  /** 表类型 */
+  var tableType: TableType = TableType.Normal
   var primaryKey: Option[PrimaryKey] = None
   val uniqueKeys = new ListBuffer[UniqueKey]
   val foreignKeys = new ListBuffer[ForeignKey]
@@ -81,9 +83,11 @@ class Table(s: Schema, n: Identifier) extends Relation(s, n) {
   }
 
   override def clone(): Table = {
-    val tb: Table = new Table(schema, name)
+    val tb = new Table(schema, name)
     tb.comment = comment
     tb.module = module
+    tb.tableType = tableType
+
     for (col <- columns) tb.add(col.clone())
     primaryKey foreach { pk =>
       val npk = pk.clone()
@@ -107,6 +111,7 @@ class Table(s: Schema, n: Identifier) extends Relation(s, n) {
    */
   def isSameStruct(o: Table): Boolean = {
     if this.qualifiedName != o.qualifiedName then false
+    else if this.tableType != o.tableType then false
     else if this.columns.size != o.columns.size then false
     else
       this.columns.forall { c =>

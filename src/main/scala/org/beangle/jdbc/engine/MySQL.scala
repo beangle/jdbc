@@ -17,9 +17,10 @@
 
 package org.beangle.jdbc.engine
 
-import org.beangle.commons.lang.{Charsets, Strings}
+import org.beangle.commons.lang.Strings
 import org.beangle.jdbc.SqlTypes.*
-import org.beangle.jdbc.meta.{Index, Table}
+import org.beangle.jdbc.meta.TableType.{InMemory, Temporary}
+import org.beangle.jdbc.meta.{Index, Table, TableType}
 
 import java.sql.Types.*
 
@@ -119,4 +120,12 @@ class MySQL5 extends AbstractEngine {
   override def version: Version = Version("[5.5,)")
 
   override def supportMultiValueInsert: Boolean = true
+
+  protected override def createTableOptions(tableType: TableType): (String, String) = {
+    tableType match {
+      case Temporary => ("temporary", "")
+      case InMemory => ("", "ENGINE=MEMORY")
+      case _ => super.createTableOptions(tableType)
+    }
+  }
 }

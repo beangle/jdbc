@@ -18,6 +18,7 @@
 package org.beangle.jdbc.engine
 
 import org.beangle.jdbc.SqlTypes.*
+import org.beangle.jdbc.meta.TableType
 
 import java.sql.Types.*
 

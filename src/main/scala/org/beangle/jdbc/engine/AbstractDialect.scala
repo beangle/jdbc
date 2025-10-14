@@ -18,8 +18,10 @@
 package org.beangle.jdbc.engine
 
 import org.beangle.commons.collection.Collections
+import org.beangle.commons.lang.Strings
 import org.beangle.commons.lang.Strings.{isEmpty, join, replace}
 import org.beangle.jdbc.meta.*
+import org.beangle.jdbc.meta.TableType.{InMemory, Normal, Temporary, Unlogged}
 
 trait AbstractDialect extends Dialect {
   self: Engine =>
@@ -28,10 +30,21 @@ trait AbstractDialect extends Dialect {
 
   override def createSchema(name: String): String = s"create schema ${name}"
 
+  protected def createTableOptions(tableType: TableType): (String, String) = {
+    tableType match {
+      case Normal => ("", "")
+      case Temporary => ("global temporary", "")
+      case Unlogged => ("", "")
+      case InMemory => ("", "")
+    }
+  }
+
   /** Table creation sql
    */
   override def createTable(table: Table): String = {
-    val buf = new StringBuilder("create table").append(' ').append(table.qualifiedName).append(" (")
+    val tableTypes = createTableOptions(table.tableType)
+    val head = if Strings.isBlank(tableTypes._1) then "create table" else s"create ${tableTypes._1} table"
+    val buf = new StringBuilder(head).append(' ').append(table.qualifiedName).append(" (")
     val iter = table.columns.iterator
     while (iter.hasNext) {
       val col: Column = iter.next()
@@ -50,6 +63,9 @@ trait AbstractDialect extends Dialect {
       if (iter.hasNext) buf.append(", ")
     }
     buf.append(')')
+
+    if Strings.isNotBlank(tableTypes._2) then buf.append(" ").append(tableTypes._2)
+
     if (!options.comment.supportsCommentOn) {
       table.comment foreach { c => buf.append(s" comment '$c'") }
     }
