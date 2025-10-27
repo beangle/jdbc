@@ -3,7 +3,7 @@ import org.beangle.parent.Settings.*
 import sbt.Keys.libraryDependencies
 
 ThisBuild / organization := "org.beangle.jdbc"
-ThisBuild / version := "1.1.3-SNAPSHOT"
+ThisBuild / version := "1.1.3"
 ThisBuild / scmInfo := Some(
   ScmInfo(
     url("https://github.com/beangle/jdbc"),
@@ -23,9 +23,7 @@ ThisBuild / developers := List(
 ThisBuild / description := "The Beangle Jdbc Library"
 ThisBuild / homepage := Some(url("https://beangle.github.io/jdbc/index.html"))
 
-val beangle_common_ver = "5.6.31"
-
-val beangle_commons = "org.beangle.commons" % "beangle-commons" % beangle_common_ver
+val beangle_commons = "org.beangle.commons" % "beangle-commons" % "5.6.32"
 val commonDeps = Seq(beangle_commons, logback_classic % "test", scalatest)
 
 lazy val root = (project in file("."))
