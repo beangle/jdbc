@@ -96,6 +96,10 @@ class DataSourceFactory extends Factory[DataSource], Initializing, Disposable {
     props.put(k, appName)
   }
 
+  protected def setPoolName(poolName: String): Unit = {
+    props.put("poolName", poolName)
+  }
+
   protected def postInit(): Unit = {
     if (password != null && password.startsWith("?")) {
       this.password =
