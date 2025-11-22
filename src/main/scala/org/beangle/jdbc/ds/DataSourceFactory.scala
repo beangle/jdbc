@@ -44,7 +44,7 @@ object DataSourceFactory {
  *
  * @author chaostone
  */
-class DataSourceFactory extends Factory[DataSource] with Initializing with Disposable {
+class DataSourceFactory extends Factory[DataSource], Initializing, Disposable {
   var url: String = _
   var user: String = _
   var password: String = _

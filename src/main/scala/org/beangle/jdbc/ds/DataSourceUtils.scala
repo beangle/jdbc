@@ -19,14 +19,12 @@ package org.beangle.jdbc.ds
 
 import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
 import org.beangle.commons.collection.Collections
-import org.beangle.commons.io.IOs
 import org.beangle.commons.lang.Strings
 import org.beangle.commons.lang.Strings.{isEmpty, isNotEmpty, substringBetween}
 import org.beangle.commons.lang.reflect.BeanInfos
 import org.beangle.commons.logging.Logging
 import org.beangle.jdbc.engine.{DriverInfo, Drivers, Engines}
-import org.beangle.jdbc.meta.Schema.NameFilter
-import org.beangle.jdbc.meta.{Database, Identifier, MetadataLoader}
+import org.beangle.jdbc.meta.Identifier
 
 import java.io.InputStream
 import java.sql.Connection
@@ -85,6 +83,13 @@ object DataSourceUtils extends Logging {
       if (!writables.contains(key)) key = "dataSource." + key
       properties.put(key, e._2)
     }
+
+    //如果没有设置最小连接数，设置为0，防止占用过多链接，这里不是性能优先，默认这个值和max是一样的
+    if (!properties.contains("minimumIdle")) properties.put("minimumIdle", "0")
+    //如果没有设置最大连接数，默认为5
+    if (!properties.contains("maximumPoolSize")) properties.put("maximumPoolSize", "5")
+    //如果设置了最小值，没有设置闲置超时，则设置为1分钟
+    if properties.contains("minimumIdle") && !properties.contains("idleTimeout") then properties.put("idleTimeout", "60000")
 
     if (driver == "oracle" && !properties.containsKey("jdbcUrl") && !props.contains("driverType")) properties.put("dataSource.driverType", "thin")
 
