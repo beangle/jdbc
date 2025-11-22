@@ -28,7 +28,7 @@ import org.beangle.jdbc.meta.Identifier
 
 import java.io.InputStream
 import java.sql.Connection
-import java.util.Properties
+import java.util as ju
 import javax.sql.DataSource
 import scala.language.existentials
 
@@ -74,35 +74,35 @@ object DataSourceUtils extends Logging {
     }
   }
 
-  private def buildProperties(driver: String, username: String, password: String, props: collection.Map[String, String]): Properties = {
-    val properties = new Properties
+  private def buildProperties(driver: String, username: String, password: String, props: collection.Map[String, String]): ju.Properties = {
+    val ps = new ju.Properties
     val writables = BeanInfos.get(classOf[HikariConfig]).writables.keySet
 
     props.foreach { e =>
       var key = if (e._1 == "url") "jdbcUrl" else e._1
       if (!writables.contains(key)) key = "dataSource." + key
-      properties.put(key, e._2)
+      ps.put(key, e._2)
     }
 
     //如果没有设置最小连接数，设置为0，防止占用过多链接，这里不是性能优先，默认这个值和max是一样的
-    if (!properties.contains("minimumIdle")) properties.put("minimumIdle", "0")
+    if !ps.containsKey("minimumIdle") then ps.put("minimumIdle", "0")
     //如果没有设置最大连接数，默认为5
-    if (!properties.contains("maximumPoolSize")) properties.put("maximumPoolSize", "5")
-    //如果设置了最小值，没有设置闲置超时，则设置为1分钟
-    if properties.contains("minimumIdle") && !properties.contains("idleTimeout") then properties.put("idleTimeout", "60000")
+    if !ps.containsKey("maximumPoolSize") then ps.put("maximumPoolSize", "5")
+    //如果没有设置闲置超时，则设置为1分钟
+    if !ps.containsKey("idleTimeout") && ps.get("minimumIdle") != ps.get("maximumPoolSize") then ps.put("idleTimeout", "60000")
 
-    if (driver == "oracle" && !properties.containsKey("jdbcUrl") && !props.contains("driverType")) properties.put("dataSource.driverType", "thin")
+    if (driver == "oracle" && !ps.containsKey("jdbcUrl") && !props.contains("driverType")) ps.put("dataSource.driverType", "thin")
 
-    if (null != username) properties.put("username", username)
-    if (null != password) properties.put("password", password)
+    if (null != username) ps.put("username", username)
+    if (null != password) ps.put("password", password)
 
     val driverInfo = Drivers.get(driver).get
-    if (properties.containsKey("jdbcUrl")) {
+    if (ps.containsKey("jdbcUrl")) {
       Class.forName(driverInfo.className)
     } else {
-      if (!properties.containsKey("dataSourceClassName")) properties.put("dataSourceClassName", driverInfo.dataSourceClassName)
+      if (!ps.containsKey("dataSourceClassName")) ps.put("dataSourceClassName", driverInfo.dataSourceClassName)
     }
-    properties
+    ps
   }
 
   def parseXml(is: InputStream, name: String): DatasourceConfig = {
