@@ -80,7 +80,9 @@ object DataSourceUtils extends Logging {
 
     props.foreach { e =>
       var key = if (e._1 == "url") "jdbcUrl" else e._1
-      if (!writables.contains(key)) key = "dataSource." + key
+      if (!writables.contains(key)){
+        key = "dataSource." + key
+      }
       ps.put(key, e._2)
     }
 

@@ -78,12 +78,22 @@ class DataSourceFactory extends Factory[DataSource], Initializing, Disposable {
           merge(readConf(urlAddr.openStream()))
         }
       }
+
       postInit()
       _result = DataSourceUtils.build(driver, user, password, props)
     } catch {
       case e: Throwable =>
         throw new RuntimeException(s"cannot find datasource named ${this.name} in ${this.url}", e)
     }
+  }
+
+  protected def setApplicationName(appName: String): Unit = {
+    val k = driver match {
+      case "oracle" => "oracle.jdbc.moduleName"
+      case "mysql" => "programName"
+      case _ => "applicationName"
+    }
+    props.put(k, appName)
   }
 
   protected def postInit(): Unit = {
