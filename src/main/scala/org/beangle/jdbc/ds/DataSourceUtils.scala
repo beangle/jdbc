@@ -86,8 +86,8 @@ object DataSourceUtils extends Logging {
       ps.put(key, e._2)
     }
 
-    //如果没有设置最小连接数，设置为0，防止占用过多链接，这里不是性能优先，默认这个值和max是一样的
-    if !ps.containsKey("minimumIdle") then ps.put("minimumIdle", "0")
+    //如果没有设置最小连接数，设置为1，防止占用过多链接，这里不是性能优先
+    if !ps.containsKey("minimumIdle") then ps.put("minimumIdle", "1")
     //如果没有设置最大连接数，默认为5
     if !ps.containsKey("maximumPoolSize") then ps.put("maximumPoolSize", "5")
     //如果没有设置闲置超时，则设置为1分钟
