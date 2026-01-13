@@ -30,7 +30,7 @@ class MySQL5 extends AbstractEngine {
   registerTypes(
     CHAR -> "char($l)", VARCHAR -> "longtext", LONGVARCHAR -> "longtext",
     NCHAR -> "nchar($l)", NVARCHAR -> "nvarchar($l)", LONGNVARCHAR -> "nvarchar($l)",
-    BOOLEAN -> "bit", BIT -> "bit",
+    BOOLEAN -> "tinyint(1)", BIT -> "bit",
     TINYINT -> "tinyint", SMALLINT -> "smallint", INTEGER -> "integer", BIGINT -> "bigint",
     REAL -> "real", FLOAT -> "float", DOUBLE -> "double precision",
     DECIMAL -> "decimal($p,$s)", NUMERIC -> "decimal($p,$s)",

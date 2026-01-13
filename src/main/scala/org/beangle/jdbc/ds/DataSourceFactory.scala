@@ -83,7 +83,7 @@ class DataSourceFactory extends Factory[DataSource], Initializing, Disposable {
       _result = DataSourceUtils.build(driver, user, password, props)
     } catch {
       case e: Throwable =>
-        throw new RuntimeException(s"cannot find datasource named ${this.name} in ${this.url}", e)
+        throw new RuntimeException(s"Init datasource named ${this.name} in ${this.url}", e)
     }
   }
 
