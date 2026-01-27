@@ -69,8 +69,8 @@ class DataSourceFactory extends Factory[DataSource], Initializing, Disposable {
           if null == driver then driver = Strings.substringBetween(url, "jdbc:", ":")
           if !props.contains("url") then props.put("url", url)
         } else if (url.startsWith("http")) {
-          val res = HttpUtils.getText(url)
-          if res.isOk then merge(readConf(new ByteArrayInputStream(res.getText.getBytes)))
+          val res = HttpUtils.get(url)
+          if res.isOk then merge(readConf(new ByteArrayInputStream(res.getBytes)))
           else throw RuntimeException(s"access error :$url")
         } else {
           val f = new java.io.File(url)
