@@ -21,7 +21,6 @@ import org.beangle.commons.collection.Collections
 import org.beangle.commons.collection.page.PageLimit
 import org.beangle.commons.io.{IOs, StringBuilderWriter}
 import org.beangle.commons.lang.Strings
-import org.beangle.commons.logging.Logging
 import org.beangle.jdbc.engine.{Engine, Engines}
 import org.beangle.jdbc.meta.SqlType
 import org.beangle.jdbc.{DefaultSqlTypeMapping, SqlTypes}
@@ -113,7 +112,7 @@ object JdbcExecutor {
   }
 }
 
-class JdbcExecutor(dataSource: DataSource) extends Logging {
+class JdbcExecutor(dataSource: DataSource) {
   private val sqlTypeMapping = new DefaultSqlTypeMapping(engine)
 
   val engine: Engine = Engines.forDataSource(dataSource)

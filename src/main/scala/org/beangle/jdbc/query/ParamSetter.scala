@@ -21,9 +21,8 @@ import org.beangle.commons.conversion.string.BooleanConverter
 import org.beangle.commons.io.IOs
 import org.beangle.commons.json.Json
 import org.beangle.commons.lang.Charsets
-import org.beangle.commons.logging.Logging
 import org.beangle.jdbc.engine.Engine
-import org.beangle.jdbc.{SqlTypeMapping, SqlTypes}
+import org.beangle.jdbc.{JdbcLogger, SqlTypeMapping, SqlTypes}
 
 import java.io.*
 import java.math.BigDecimal
@@ -69,7 +68,7 @@ class TypeParamSetter(engine: Engine, params: collection.Seq[Any], types: collec
   }
 }
 
-object ParamSetter extends Logging {
+object ParamSetter {
 
   /** Set Parameter to statement.
    * value is not null
@@ -186,7 +185,7 @@ object ParamSetter extends Logging {
         case _ => if (0 == sqltype) stmt.setObject(index, value) else stmt.setObject(index, value, sqltype)
       }
     } catch {
-      case e: Exception => logger.error("set value error", e);
+      case e: Exception => JdbcLogger.error("set value error", e);
     }
   }
 

@@ -18,22 +18,21 @@
 package org.beangle.jdbc.ds
 
 import org.beangle.commons.lang.ClassLoaders
+import org.beangle.commons.xml.Document
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-
-import scala.xml.XML
 
 /**
  * @author chaostone
  */
-class DatasourceConfigTest extends AnyFlatSpec with Matchers {
+class DatasourceConfigTest extends AnyFlatSpec, Matchers {
   "DatasourceConfig " should "build a correct orace datasource" in {
     val is = ClassLoaders.getResourceAsStream("datasources.xml").get
     val config = DataSourceUtils.parseXml(is, "tiger")
     assert(config.props.contains("driverType"))
   }
   "DataSourceUtils " should "build single datasource" in {
-    val ds = XML.load(ClassLoaders.getResource("single.xml").get)
+    val ds = Document.parse(ClassLoaders.getResource("single.xml").get)
     val config = DataSourceUtils.parseXml(ds)
     assert(config.props.contains("driverType"))
   }

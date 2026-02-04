@@ -17,14 +17,14 @@
 
 package org.beangle.jdbc
 
-import java.sql.Types
-
 import org.beangle.commons.lang.annotation.value
 import org.beangle.jdbc.engine.Engines
-import org.scalatest.matchers.should.Matchers
 import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
-class SqlTypeMappingTest extends AnyFunSpec with Matchers {
+import java.sql.Types
+
+class SqlTypeMappingTest extends AnyFunSpec, Matchers {
   describe("SqlTypeMapping") {
     it("test value type") {
       val mapping = new DefaultSqlTypeMapping(Engines.forName("h2"))
@@ -39,5 +39,5 @@ class SqlTypeMappingTest extends AnyFunSpec with Matchers {
 class Terms(value: Short)
 
 enum Meta {
-  case A,B,C
+  case A, B, C
 }

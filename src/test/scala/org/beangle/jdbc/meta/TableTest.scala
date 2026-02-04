@@ -23,7 +23,7 @@ import org.scalatest.matchers.should.Matchers
 
 import java.sql.Types
 
-class TableTest extends AnyFlatSpec with Matchers {
+class TableTest extends AnyFlatSpec, Matchers {
 
   val oracle = new Oracle10g
   val postgresql = new PostgreSQL10

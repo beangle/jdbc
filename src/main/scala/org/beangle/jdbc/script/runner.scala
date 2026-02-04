@@ -17,16 +17,16 @@
 
 package org.beangle.jdbc.script
 
-import java.io.{InputStream, InputStreamReader}
-import java.net.URL
-
-import javax.sql.DataSource
 import org.beangle.commons.io.{IOs, StringBuilderWriter}
 import org.beangle.commons.lang.Charsets
 import org.beangle.commons.lang.Strings.{lowerCase, substringAfter, substringBefore, trim}
 import org.beangle.commons.lang.time.Stopwatch
-import org.beangle.commons.logging.Logging
-import org.beangle.jdbc.script.Runner._
+import org.beangle.jdbc.JdbcLogger
+import org.beangle.jdbc.script.Runner.*
+
+import java.io.{InputStream, InputStreamReader}
+import java.net.URL
+import javax.sql.DataSource
 
 object Runner {
   def read(parser: Parser, urls: URL*): List[Script] = {
@@ -46,7 +46,7 @@ object Runner {
   }
 }
 
-class Runner(parser: Parser, urls: URL*) extends Logging {
+class Runner(parser: Parser, urls: URL*) {
   private val list = read(parser, urls: _*)
 
   def execute(dataSource: DataSource, ignoreError: Boolean): Unit = {
@@ -64,14 +64,14 @@ class Runner(parser: Parser, urls: URL*) extends Logging {
         val statement = iter.next()
         val cmd = lowerCase(substringBefore(statement, " "))
         if (commands.contains(cmd)) {
-          if (cmd == "prompt") logger.info(trim(substringAfter(statement, cmd)))
-          else logger.info(statement)
+          if (cmd == "prompt") JdbcLogger.info(trim(substringAfter(statement, cmd)))
+          else JdbcLogger.info(statement)
         } else {
           try {
             stm.execute(statement)
           } catch {
             case e: Exception =>
-              logger.error(s"Failure when exceute sql $statement", e)
+              JdbcLogger.error(s"Failure when exceute sql $statement", e)
               if (!ignoreError) terminated = true
           }
         }
@@ -79,9 +79,9 @@ class Runner(parser: Parser, urls: URL*) extends Logging {
       stm.close()
       conn.commit()
       conn.close()
-      logger.info(s"exec ${script.source} using $sw")
+      JdbcLogger.info(s"exec ${script.source} using $sw")
     }
-    logger.info(s"exec sql using $watch")
+    JdbcLogger.info(s"exec sql using $watch")
   }
 }
 

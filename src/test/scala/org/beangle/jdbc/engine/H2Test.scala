@@ -20,25 +20,25 @@ package org.beangle.jdbc.engine
 import org.beangle.commons.io.IOs
 import org.beangle.commons.json.JsonObject
 import org.beangle.commons.lang.ClassLoaders
-import org.beangle.commons.logging.Logging
+import org.beangle.jdbc.JdbcLogger
 import org.beangle.jdbc.ds.DataSourceUtils
 import org.beangle.jdbc.meta.{Database, Identifier, MetadataLoader, Schema}
 import org.beangle.jdbc.query.JdbcExecutor
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-class H2Test extends AnyFlatSpec with Matchers with Logging {
+class H2Test extends AnyFlatSpec, Matchers {
   protected var schema: Schema = _
 
   protected def listTableAndSequences = {
     val tables = schema.tables
     for (name <- tables.keySet) {
-      logger.info(s"table $name")
+      JdbcLogger.info(s"table $name")
     }
 
     val seqs = schema.sequences
     for (obj <- seqs) {
-      logger.info(s"sequence $obj")
+      JdbcLogger.info(s"sequence $obj")
     }
   }
 

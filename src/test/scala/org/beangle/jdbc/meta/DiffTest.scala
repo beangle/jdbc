@@ -23,7 +23,7 @@ import org.scalatest.matchers.should.Matchers
 
 import java.sql.Types
 
-class DiffTest extends AnyFunSpec with Matchers {
+class DiffTest extends AnyFunSpec, Matchers {
   val engine = new PostgreSQL10
 
   describe("Diff") {

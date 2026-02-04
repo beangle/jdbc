@@ -21,6 +21,7 @@ import org.beangle.commons.bean.{Disposable, Factory, Initializing}
 import org.beangle.commons.collection.Collections
 import org.beangle.commons.lang.Strings
 import org.beangle.commons.net.http.HttpUtils
+import org.beangle.commons.xml.Document
 import org.beangle.jdbc.ds.DataSourceUtils.parseXml
 
 import java.io.{ByteArrayInputStream, InputStream}
@@ -52,10 +53,10 @@ class DataSourceFactory extends Factory[DataSource], Initializing, Disposable {
   var name: String = _
   var props: collection.mutable.Map[String, String] = Collections.newMap
 
-  private var _result: DataSource = _
+  private var result: DataSource = _
 
-  override def result: DataSource = {
-    _result
+  override def getObject: DataSource = {
+    result
   }
 
   override def destroy(): Unit = {
@@ -80,7 +81,7 @@ class DataSourceFactory extends Factory[DataSource], Initializing, Disposable {
       }
 
       postInit()
-      _result = DataSourceUtils.build(driver, user, password, props)
+      result = DataSourceUtils.build(driver, user, password, props)
     } catch {
       case e: Throwable =>
         throw new RuntimeException(s"Init datasource named ${this.name} in ${this.url}", e)
@@ -112,11 +113,10 @@ class DataSourceFactory extends Factory[DataSource], Initializing, Disposable {
   }
 
   private def readConf(is: InputStream): DatasourceConfig = {
-    val root = scala.xml.XML.load(is)
+    val root = Document.parse(is)
     val datasources = root \\ "datasource"
     val dbs = root \\ "db"
     if (dbs.isEmpty && datasources.isEmpty) {
-      is.close()
       DataSourceUtils.parseXml(root)
     } else {
       var conf: DatasourceConfig = null

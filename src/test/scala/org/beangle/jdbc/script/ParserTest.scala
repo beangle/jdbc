@@ -17,10 +17,10 @@
 
 package org.beangle.jdbc.script
 
-import org.scalatest.matchers.should.Matchers
 import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
-class ParserTest extends AnyFunSpec with Matchers {
+class ParserTest extends AnyFunSpec, Matchers {
   describe("Oracle Parser") {
     it("parse prompt") {
       val list = OracleParser.parse(

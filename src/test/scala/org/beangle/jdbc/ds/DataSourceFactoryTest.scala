@@ -24,14 +24,14 @@ import org.scalatest.flatspec.AnyFlatSpec
 /**
   * @author chaostone
   */
-class DataSourceFactoryTest extends AnyFlatSpec with Matchers {
+class DataSourceFactoryTest extends AnyFlatSpec , Matchers {
 
   "DataSourceFactory " should "build a datasource" in {
     val factory = new DataSourceFactory()
     factory.url = ClassLoaders.getResource("datasources.xml").get.toString
     factory.name = "h2"
     factory.init()
-    factory.result.getConnection
+    factory.getObject.getConnection
     factory.destroy()
   }
 }

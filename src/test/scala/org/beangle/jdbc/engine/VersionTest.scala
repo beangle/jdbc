@@ -17,10 +17,10 @@
 
 package org.beangle.jdbc.engine
 
-import org.scalatest.matchers.should.Matchers
 import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class VersionTest extends AnyFlatSpec with Matchers {
+class VersionTest extends AnyFlatSpec, Matchers {
 
   "version [1.0,2.0] " should "contain both boundary" in {
     val version = Version("[1.0,2.0]");

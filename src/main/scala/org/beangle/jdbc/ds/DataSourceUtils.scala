@@ -22,7 +22,8 @@ import org.beangle.commons.collection.Collections
 import org.beangle.commons.lang.Strings
 import org.beangle.commons.lang.Strings.{isEmpty, isNotEmpty, substringBetween}
 import org.beangle.commons.lang.reflect.BeanInfos
-import org.beangle.commons.logging.Logging
+import org.beangle.commons.xml.{Document, Node}
+import org.beangle.jdbc.JdbcLogger
 import org.beangle.jdbc.engine.{DriverInfo, Drivers, Engines}
 import org.beangle.jdbc.meta.Identifier
 
@@ -32,7 +33,7 @@ import java.util as ju
 import javax.sql.DataSource
 import scala.language.existentials
 
-object DataSourceUtils extends Logging {
+object DataSourceUtils {
 
   def build(dbconf: DatasourceConfig): DataSource = {
     DataSourceFactory.build(dbconf.driver, dbconf.user, dbconf.password, dbconf.props)
@@ -69,7 +70,7 @@ object DataSourceUtils extends Logging {
         if (null != method) {
           method.invoke(dataSource)
         } else {
-          logger.info(s"Cannot find ${dataSource.getClass.getName}'s close method")
+          JdbcLogger.info(s"Cannot find ${dataSource.getClass.getName}'s close method")
         }
     }
   }
@@ -80,7 +81,7 @@ object DataSourceUtils extends Logging {
 
     props.foreach { e =>
       var key = if (e._1 == "url") "jdbcUrl" else e._1
-      if (!writables.contains(key)){
+      if (!writables.contains(key)) {
         key = "dataSource." + key
       }
       ps.put(key, e._2)
@@ -109,7 +110,7 @@ object DataSourceUtils extends Logging {
 
   def parseXml(is: InputStream, name: String): DatasourceConfig = {
     var conf: DatasourceConfig = null
-    (scala.xml.XML.load(is) \\ "datasource") foreach { elem =>
+    (Document.parse(is) \\ "datasource") foreach { elem =>
       val one = parseXml(elem)
       if (name != null) {
         if (name == one.name) conf = one
@@ -120,7 +121,7 @@ object DataSourceUtils extends Logging {
     conf
   }
 
-  def parseXml(xml: scala.xml.Node): DatasourceConfig = {
+  def parseXml(xml: Node): DatasourceConfig = {
     var driver: DriverInfo = null
     val url = (xml \\ "url").text.trim
     var driverName = (xml \\ "driver").text.trim

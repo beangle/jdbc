@@ -23,7 +23,7 @@ import org.scalatest.matchers.should.Matchers
 
 import java.sql.Types
 
-class MigratorTest extends AnyFunSpec with Matchers {
+class MigratorTest extends AnyFunSpec, Matchers {
   val engine = new PostgreSQL10
   describe("Migrator") {
     it("test diff") {

@@ -21,7 +21,7 @@ import org.beangle.jdbc.engine.{Engines, Oracle10g, PostgreSQL10}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-class ForeignKeyTest extends AnyFlatSpec with Matchers {
+class ForeignKeyTest extends AnyFlatSpec, Matchers {
 
   val oracle = new Oracle10g
   val postgresql = new PostgreSQL10

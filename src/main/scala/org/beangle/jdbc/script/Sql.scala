@@ -17,18 +17,19 @@
 
 package org.beangle.jdbc.script
 
-import java.io.{File, FileInputStream}
-import java.net.URL
-
 import org.beangle.commons.io.Files./
 import org.beangle.commons.lang.Consoles.{prompt, readPassword, shell}
-import org.beangle.commons.lang.Strings._
+import org.beangle.commons.lang.Strings.*
 import org.beangle.commons.lang.{Numbers, SystemInfo}
-import org.beangle.commons.logging.Logging
+import org.beangle.commons.xml.Document
+import org.beangle.jdbc.JdbcLogger
 import org.beangle.jdbc.ds.{DataSourceUtils, DatasourceConfig}
 import org.beangle.jdbc.engine.UrlFormat
 
-object Sql extends Logging {
+import java.io.{File, FileInputStream}
+import java.net.URL
+
+object Sql {
 
   var datasource: DatasourceConfig = _
 
@@ -46,7 +47,7 @@ object Sql extends Logging {
       return
     }
     if (datasources.isEmpty) {
-      logger.info("Cannot find datasource")
+      JdbcLogger.info("Cannot find datasource")
       return
     }
 
@@ -167,8 +168,8 @@ object Sql extends Logging {
     assert(null != workdir)
     val target = new File(workdir + / + "datasources.xml")
     if (target.exists) {
-      logger.info(s"Read config file ${target.getName}")
-      (scala.xml.XML.load(new FileInputStream(target)) \\ "datasource") foreach { elem =>
+      JdbcLogger.info(s"Read config file ${target.getName}")
+      (Document.parse(target) \\ "datasource") foreach { elem =>
         datasources += DataSourceUtils.parseXml(elem)
       }
     }

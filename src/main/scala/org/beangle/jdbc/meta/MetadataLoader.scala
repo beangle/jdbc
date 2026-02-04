@@ -23,7 +23,7 @@ import org.beangle.commons.io.IOs
 import org.beangle.commons.lang.Strings
 import org.beangle.commons.lang.Strings.replace
 import org.beangle.commons.lang.time.Stopwatch
-import org.beangle.commons.logging.Logging
+import org.beangle.jdbc.JdbcLogger
 import org.beangle.jdbc.engine.{Engine, Engines}
 import org.beangle.jdbc.meta.Schema.NameFilter
 import org.beangle.jdbc.query.JdbcExecutor
@@ -102,7 +102,7 @@ object MetadataLoader {
   }
 }
 
-class MetadataLoader(meta: DatabaseMetaData, engine: Engine) extends Logging {
+class MetadataLoader(meta: DatabaseMetaData, engine: Engine) {
 
   import MetadataColumns.*
 
@@ -174,10 +174,10 @@ class MetadataLoader(meta: DatabaseMetaData, engine: Engine) extends Logging {
       }
     }
     rs.close()
-    logger.debug(s"Load ${views.size} views in ${sw.toString}")
+    JdbcLogger.debug(s"Load ${views.size} views in ${sw.toString}")
     if (views.isEmpty) return
     val cols = loadColumns(schema.database, false, catalogName, schemaPattern)
-    logger.debug(s"Load $cols columns in $sw")
+    JdbcLogger.debug(s"Load $cols columns in $sw")
     if (engine.metadataLoadSql.supportViewExtra) {
       batchLoadViewExtra(schema, engine.metadataLoadSql)
     }
@@ -188,7 +188,7 @@ class MetadataLoader(meta: DatabaseMetaData, engine: Engine) extends Logging {
     val catalogName = pattern._1
     val schemaPattern = pattern._2
     val sw = new Stopwatch(true)
-    logger.debug(s"Loading tables from $catalogName $schemaPattern from ${meta.getDatabaseProductName}")
+    JdbcLogger.debug(s"Loading tables from $catalogName $schemaPattern from ${meta.getDatabaseProductName}")
     val rs = meta.getTables(catalogName, schemaPattern, null, Array("TABLE"))
     val tables = new mutable.HashMap[String, Table]
     while (rs.next()) {
@@ -200,7 +200,7 @@ class MetadataLoader(meta: DatabaseMetaData, engine: Engine) extends Logging {
       }
     }
     rs.close()
-    logger.debug(s"Load ${tables.size} tables in ${sw.toString}")
+    JdbcLogger.debug(s"Load ${tables.size} tables in ${sw.toString}")
 
     if (tables.isEmpty) return
 
@@ -209,14 +209,14 @@ class MetadataLoader(meta: DatabaseMetaData, engine: Engine) extends Logging {
     val origTabCount = tables.size
     schema.cleanEmptyTables()
     tables.filterInPlace((_, table) => table.columns.nonEmpty)
-    if (tables.size == origTabCount) logger.debug(s"Load $cols columns in $sw")
-    else logger.debug(s"Load $cols columns and evict empty ${origTabCount - tables.size} tables in $sw.")
+    if (tables.size == origTabCount) JdbcLogger.debug(s"Load $cols columns in $sw")
+    else JdbcLogger.debug(s"Load $cols columns and evict empty ${origTabCount - tables.size} tables in $sw.")
 
     if (extras) {
       if (engine.metadataLoadSql.supportsTableExtra) {
         batchLoadTableExtra(schema, engine.metadataLoadSql)
       } else {
-        logger.debug("Loading primary key,foreign key and index.")
+        JdbcLogger.debug("Loading primary key,foreign key and index.")
         val tableNames = new ConcurrentLinkedQueue[String]
         tableNames.addAll(asJava(tables.keySet.toList.sortWith(_ < _)))
         Tasks.start(new ExtraMetaLoadTask(tableNames, tables), 5)
@@ -350,7 +350,7 @@ class MetadataLoader(meta: DatabaseMetaData, engine: Engine) extends Logging {
     }
     rs.close()
     schema.tables.values foreach { t => t.convertIndexToUniqueKeys() }
-    logger.debug(s"Load constraint and index in $sw.")
+    JdbcLogger.debug(s"Load constraint and index in $sw.")
   }
 
   private def batchLoadViewExtra(schema: Schema, sql: MetadataLoadSql): Unit = {
@@ -393,7 +393,7 @@ class MetadataLoader(meta: DatabaseMetaData, engine: Engine) extends Logging {
           val catalogName = if engine.catalogAsSchema then table.schema.name.value else null
           val schemaName = if engine.catalogAsSchema then null else table.schema.name.value
 
-          logger.debug(s"Loading ${table.qualifiedName}...")
+          JdbcLogger.debug(s"Loading ${table.qualifiedName}...")
           // load primary key
           var rs: ResultSet = null
           rs = meta.getPrimaryKeys(catalogName, schemaName, table.name.value)
@@ -437,11 +437,11 @@ class MetadataLoader(meta: DatabaseMetaData, engine: Engine) extends Logging {
           table.convertIndexToUniqueKeys()
         } catch {
           case _: IndexOutOfBoundsException =>
-          case e: Exception => logger.error("Error in loading metadata ", e)
+          case e: Exception => JdbcLogger.error("Error in loading metadata ", e)
         }
         nextTableName = buffer.poll()
       }
-      logger.debug(s"${Thread.currentThread().getName} loaded $completed tables")
+      JdbcLogger.debug(s"${Thread.currentThread().getName} loaded $completed tables")
     }
   }
 

@@ -15,18 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.beangle.jdbc.engine
+package org.beangle.jdbc
 
-import org.scalatest.flatspec.AnyFlatSpec
-import org.scalatest.matchers.should.Matchers
+import org.beangle.commons.logging.{Logger, slf4j}
 
-class SQLServerTest extends AnyFlatSpec, Matchers {
-  var engine = new SQLServer2008
-  val rs1 = engine.limit("select * from users", 0, 10)
-  val rs2 = engine.limit("select * from users order by name", 0, 10)
-  val rs3 = engine.limit("select * FROM users order by name", 10, 10)
-
-  println(rs1)
-  println(rs2)
-  println(rs3)
-}
+object JdbcLogger extends Logger(slf4j("org.beangle.jdbc"))

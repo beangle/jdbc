@@ -21,7 +21,7 @@ import org.beangle.jdbc.engine.Oracle10g
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-class SchemaTest extends AnyFunSpec with Matchers {
+class SchemaTest extends AnyFunSpec, Matchers {
   val oracle = new Oracle10g
   describe("Schema") {
     it("getTable") {

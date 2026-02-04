@@ -24,7 +24,7 @@ import org.scalatest.matchers.should.Matchers
 
 import java.io.File
 
-class SerializerTest extends AnyFunSpec with Matchers {
+class SerializerTest extends AnyFunSpec, Matchers {
 
   describe("DBXML") {
     it("to xml") {
