@@ -95,9 +95,11 @@ object Serializer {
 
   private class Exporter(db: Database) {
     def toXml: String = {
-      val dbNode = Element("db", ("engine", db.engine.name), ("version", db.version))
+      val doc = new Document("db")
+      doc.set("engine", db.engine.name)
+      doc.set("version", db.version)
       if (db.schemas.nonEmpty) {
-        val schemasNode = dbNode.append("schemas")
+        val schemasNode = doc.append("schemas")
         val schemaNames = db.schemas.keys.toBuffer.sorted
         schemaNames foreach { schemaName =>
           val schema = db.schemas(schemaName)
@@ -118,7 +120,7 @@ object Serializer {
           }
         }
       }
-      dbNode.toXml
+      doc.toXml
     }
 
     private def appendXml(table: Table, tablesNode: Element): Unit = {
