@@ -54,18 +54,16 @@ object Sql {
     if (datasources.size == 1) datasource = datasources.head
     println("Sql executor:help ls exec exit(quit/q)")
     shell({
-      val prefix =
-        if (null != datasource) datasource.name
-        else "sql"
+      val prefix = if (null != datasource) datasource.name else "sql"
       prefix + " >"
-    }, Set("exit", "quit", "q"), {
+    }, Set("exit", "quit", "q")) {
       case "ls" => info()
       case "help" => printHelp()
       case t =>
         if (t.startsWith("use")) use(Numbers.toInt(trim(substringAfter(t, "use")), 0))
         else if (t.startsWith("exec")) exec(trim(substringAfter(t, "exec")))
         else if (isNotEmpty(t)) println(t + ": command not found...")
-    })
+    }
   }
 
   def sqlFiles: Array[String] = {
@@ -123,10 +121,10 @@ object Sql {
       if (index > -1) {
         datasource = datasources(index)
       } else {
-        val selectName = prompt("choose datasource index?", null, name => {
+        val selectName = prompt("choose datasource index?", null) { name =>
           val result = Numbers.convert2Int(name, null)
           result != null && result > -1 && result < datasources.size
-        })
+        }
         datasource = datasources(Numbers.toInt(selectName))
       }
     }
@@ -149,7 +147,7 @@ object Sql {
 
   private def config(resource: DatasourceConfig): Unit = {
     var url = resource.props.get("url").orNull
-    if (null == url) {
+    if (null != url) {
       val format = new UrlFormat(url)
       if (format.params.nonEmpty) {
         val params = format.params

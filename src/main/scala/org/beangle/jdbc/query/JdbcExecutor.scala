@@ -374,8 +374,7 @@ class JdbcExecutor(dataSource: DataSource) {
         rollback(conn)
         rethrow2(e, sql, types, curParam)
     } finally {
-      stmt.close()
-      conn.close()
+      IOs.close(stmt, conn)
     }
     rows.toList
   }

@@ -65,6 +65,7 @@ object MetadataColumns {
 }
 
 object MetadataLoader {
+
   def dump(meta: DatabaseMetaData, engine: Engine, catalog: Option[Identifier], schema: Option[Identifier]): Database = {
     val database = new Database(engine)
 
@@ -219,7 +220,8 @@ class MetadataLoader(meta: DatabaseMetaData, engine: Engine) {
         JdbcLogger.debug("Loading primary key,foreign key and index.")
         val tableNames = new ConcurrentLinkedQueue[String]
         tableNames.addAll(asJava(tables.keySet.toList.sortWith(_ < _)))
-        Tasks.start(new ExtraMetaLoadTask(tableNames, tables), 5)
+        //FIXME 多线程加载，可能会导致connection并发访问异常，需要优化
+        Tasks.run(new ExtraMetaLoadTask(tableNames, tables), 1, None)
       }
     }
   }

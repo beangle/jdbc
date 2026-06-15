@@ -76,9 +76,7 @@ class Runner(parser: Parser, urls: URL*) {
           }
         }
       }
-      stm.close()
-      conn.commit()
-      conn.close()
+      IOs.close(stm, conn)
       JdbcLogger.info(s"exec ${script.source} using $sw")
     }
     JdbcLogger.info(s"exec sql using $watch")

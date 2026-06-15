@@ -22,7 +22,7 @@ import org.beangle.commons.io.IOs
 import org.beangle.commons.json.Json
 import org.beangle.commons.lang.Charsets
 import org.beangle.jdbc.engine.Engine
-import org.beangle.jdbc.{JdbcLogger, SqlTypeMapping, SqlTypes}
+import org.beangle.jdbc.{SqlTypeMapping, SqlTypes}
 
 import java.io.*
 import java.math.BigDecimal
@@ -79,8 +79,7 @@ object ParamSetter {
    * @param sqltype standard sql type
    */
   def setParam(engine: Engine, stmt: PreparedStatement, index: Int, value: Any, sqltype: Int): Unit = {
-    try {
-      sqltype match {
+    sqltype match {
         case CHAR | VARCHAR | NVARCHAR =>
           stmt.setString(index, value.asInstanceOf[String])
         case LONGVARCHAR | LONGNVARCHAR =>
@@ -183,9 +182,6 @@ object ParamSetter {
           }
           stmt.setObject(index, engine.mkJsonObject(str), Types.OTHER)
         case _ => if (0 == sqltype) stmt.setObject(index, value) else stmt.setObject(index, value, sqltype)
-      }
-    } catch {
-      case e: Exception => JdbcLogger.error("set value error", e);
     }
   }
 

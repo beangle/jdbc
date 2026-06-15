@@ -19,6 +19,7 @@ package org.beangle.jdbc.ds
 
 import org.beangle.commons.bean.{Disposable, Factory, Initializing}
 import org.beangle.commons.collection.Collections
+import org.beangle.commons.io.IOs
 import org.beangle.commons.lang.Strings
 import org.beangle.commons.net.http.HttpUtils
 import org.beangle.commons.xml.Document
@@ -113,28 +114,32 @@ class DataSourceFactory extends Factory[DataSource], Initializing, Disposable {
   }
 
   private def readConf(is: InputStream): DatasourceConfig = {
-    val root = Document.parse(is)
-    val datasources = root \\ "datasource"
-    val dbs = root \\ "db"
-    if (dbs.isEmpty && datasources.isEmpty) {
-      DataSourceUtils.parseXml(root)
-    } else {
-      var conf: DatasourceConfig = null
-      val nodes = if (datasources.isEmpty) dbs else datasources
-      nodes foreach { elem =>
-        val one = parseXml(elem)
-        if (this.name != null) {
-          if (this.name == one.name) conf = one
-        } else {
-          conf = one
+    try {
+      val root = Document.parse(is)
+      val datasources = root \\ "datasource"
+      val dbs = root \\ "db"
+      if (dbs.isEmpty && datasources.isEmpty) {
+        DataSourceUtils.parseXml(root)
+      } else {
+        var conf: DatasourceConfig = null
+        val nodes = if (datasources.isEmpty) dbs else datasources
+        nodes foreach { elem =>
+          val one = parseXml(elem)
+          if (this.name != null) {
+            if (this.name == one.name) conf = one
+          } else {
+            conf = one
+          }
         }
+        conf
       }
-      is.close()
-      conf
+    } finally {
+      IOs.close(is)
     }
   }
 
   private def merge(conf: DatasourceConfig): Unit = {
+    if (conf == null) return
     if (null == user) user = conf.user
     if (null == password) password = conf.password
     if (null == driver) driver = conf.driver
