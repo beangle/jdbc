@@ -87,7 +87,9 @@ class PostgresCsvReader(itor: Iterator[Array[_]], types: collection.Seq[Int]) ex
           case i: Instant => sb.append(instantFormatter.format(i.atOffset(zoneOffset))).append(',')
           case s: String =>
             val str = Strings.replace(s, "\"", "'\"")
-            val res = if (str.length > s.length) {
+            val res = if (s.isEmpty) {
+              "\"\""
+            } else if (str.length > s.length) {
               s""""${str}""""
             } else if (str.contains(",")) {
               s""""${str}""""
