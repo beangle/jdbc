@@ -26,12 +26,14 @@ import javax.sql.DataSource
 
 object Runner {
 
-  /** Execute parsed statements against a datasource. */
-  def execute(dataSource: DataSource, statements: Seq[Statement], ignoreError: Boolean): Unit = {
+  /** Execute parsed statements against a datasource.
+   *  Returns true if every statement succeeded; with ignoreError=false failures are rethrown. */
+  def execute(dataSource: DataSource, statements: Seq[Statement], ignoreError: Boolean): Boolean = {
     val watch = new Stopwatch(true)
     val conn = dataSource.getConnection()
     conn.setAutoCommit(true)
     val stm = conn.createStatement()
+    var success = true
     try {
       val iter = statements.iterator
       while (iter.hasNext) {
@@ -48,6 +50,7 @@ object Runner {
             }
           } catch {
             case e: Exception =>
+              success = false
               JdbcLogger.error(s"Failure when exceute sql $statement.sql", e)
               if (!ignoreError) throw e
           }
@@ -57,6 +60,7 @@ object Runner {
       IOs.close(stm, conn)
     }
     JdbcLogger.info(s"exec sql using $watch")
+    success
   }
 
   /** Execute an `@loop` INSERT...SELECT in committed batches with an auto appended LIMIT. */
