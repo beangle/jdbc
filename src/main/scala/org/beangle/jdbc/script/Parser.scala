@@ -23,22 +23,22 @@ import org.beangle.commons.lang.Strings.*
 import org.beangle.jdbc.engine.Engine
 
 import java.io.{InputStream, InputStreamReader}
-import java.net.URL
+import java.net.URI
 
 object Parser {
   /** Meta commands that are logged instead of being executed as SQL. */
   val commands: Set[String] = Set("set", "prompt", "exit")
 
   /** Read and parse script files into [[Script]]s. */
-  def read(parser: Parser, urls: URL*): List[Script] = {
+  def read(parser: Parser, uris: URI*): List[Script] = {
     val buf = new collection.mutable.ListBuffer[Script]
-    for (url <- urls) {
+    for (uri <- uris) {
       var in: InputStream = null
       try {
-        in = url.openStream()
+        in = uri.toURL.openStream()
         val sw = new StringBuilderWriter(16)
         IOs.copy(new InputStreamReader(in, Charsets.UTF_8), sw)
-        buf += new Script(url, parser.parse(sw.toString))
+        buf += new Script(uri, parser.parse(sw.toString))
       } finally {
         IOs.close(in)
       }
@@ -47,8 +47,8 @@ object Parser {
   }
 
   /** Read and parse script files into flattened statements. */
-  def readStatements(parser: Parser, urls: URL*): List[Statement] = {
-    read(parser, urls: _*).flatMap(_.statements)
+  def readStatements(parser: Parser, uris: URI*): List[Statement] = {
+    read(parser, uris: _*).flatMap(_.statements)
   }
 
   def forEngine(engine: Engine): Parser = {

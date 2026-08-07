@@ -49,7 +49,7 @@ object Main {
       val source = org.beangle.jdbc.ds.Source(ds)
       try {
         files.foreach { f =>
-          val statements = Parser.readStatements(Parser.forEngine(source.engine), f.toURI.toURL)
+          val statements = Parser.readStatements(Parser.forEngine(source.engine), f.toURI)
           if (statements.nonEmpty) {
             JdbcLogger.info(s"executing ${statements.size} statements from $f")
             Runner.execute(source.dataSource, statements, ignoreError = true)

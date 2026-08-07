@@ -46,7 +46,7 @@ select s.id from source_data s
 where not exists(select 1 from target_data t where t.id=s.id)
 ;""")
 
-      val statements = Parser.read(OracleParser, tmp.toURI.toURL).flatMap(_.statements)
+      val statements = Parser.read(OracleParser, tmp.toURI).flatMap(_.statements)
       Runner.execute(ds, statements, ignoreError = false)
 
       val verify = ds.getConnection
