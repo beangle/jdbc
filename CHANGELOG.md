@@ -2,13 +2,18 @@
 
 All notable changes to this project are documented in this file.
 
-## [Unreleased]
+## [1.1.12] - 2026-08-07
+
+### Added
+- Support `Decimal5` and `TinyDecimal5` in `DefaultSqlTypeMapping`
+- Add `sql.sh` / `sql.ps1` launchers and one-shot `Main` CLI replacing the interactive `Sql` shell
 
 ### Changed
 - Upgrade build to sbt 2.x (bare settings, sbt 2 compatible plugins)
 - Rework script support: parse SQL scripts into structured `Statement` objects with comments and directives, add `@loop` directive for batched `INSERT ... SELECT`, move parsing into `Parser` and execution into `Runner`
-- Replace interactive `Sql` shell with one-shot `Main` and add `sql.sh` / `sql.ps1` launchers
-- Update `beangle-commons` to 6.2.2 in launcher scripts
+- `Runner.execute` now returns a boolean indicating whether every statement succeeded, so failures can be propagated while later best-effort statements still run
+- `Parser.read` / `Parser.readStatements` accept `URI*` instead of `URL*`
+- Update `beangle-commons` to 6.2.2
 
 ## [1.1.10] - 2026-07-24
 

@@ -46,7 +46,7 @@ export beangle_commons_ver=6.2.2
 export slf4j_ver=2.0.18
 export logback_ver=1.6.1
 export boot_ver=0.1.28
-export beangle_jdbc_ver=${BEANGLE_JDBC_VER:-1.1.11}
+export beangle_jdbc_ver=${BEANGLE_JDBC_VER:-1.1.12}
 
 download org.scala-lang scala3-library_3 $scala3_ver
 download org.beangle.commons beangle-commons $beangle_commons_ver

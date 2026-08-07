@@ -15,7 +15,7 @@ The Beangle Jdbc Library is a lightweight JDBC toolkit for Scala 3, providing da
 ## Dependency
 
 ```scala
-libraryDependencies += "org.beangle.jdbc" % "beangle-jdbc" % "1.1.11-SNAPSHOT"
+libraryDependencies += "org.beangle.jdbc" % "beangle-jdbc" % "1.1.12"
 ```
 
 Requires Scala 3 and JDK 8+.

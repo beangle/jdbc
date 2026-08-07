@@ -64,7 +64,7 @@ $beangleCommonsVer = "6.2.2"
 $slf4jVer = "2.0.18"
 $logbackVer = "1.6.1"
 $bootVer = "0.1.28"
-$beangleJdbcVer = if ($env:BEANGLE_JDBC_VER) { $env:BEANGLE_JDBC_VER } else { "1.1.11" }
+$beangleJdbcVer = if ($env:BEANGLE_JDBC_VER) { $env:BEANGLE_JDBC_VER } else { "1.1.12" }
 
 Add-MavenArtifact "org.scala-lang" "scala3-library_3" $scala3Ver
 Add-MavenArtifact "org.beangle.commons" "beangle-commons" $beangleCommonsVer
