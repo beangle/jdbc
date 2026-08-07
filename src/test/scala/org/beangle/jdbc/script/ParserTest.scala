@@ -31,7 +31,7 @@ drop package seq_util;
 drop package string_util;
 """)
       list.size should equal(5)
-      list(1) should equal("set feedback off")
+      list(1).sql should equal("set feedback off")
     }
 
     it("parse package") {
@@ -43,9 +43,35 @@ IS
         PROCEDURE update_sequence(v_table_name varchar2, v_seq_name varchar2);
 END SEQ_UTIL;
 /""")
-      for (l <- states) println(l)
+      for (s <- states) println(s.sql)
       states.size should equal(2)
-      states(0) should equal("prompt 安装更新sequence起始值的脚本...")
+      states(0).sql should equal("prompt 安装更新sequence起始值的脚本...")
+    }
+
+    it("extract loop directive from leading comments") {
+      val list = OracleParser.parse(
+        """-- @loop batch-size=3 max-batches=10 import target_data
+insert into target_data(id)
+select s.id from source_data s;
+""")
+      list.size should equal(1)
+      val d = list.head.directive(Directive.Loop).get
+      d.param("batch-size") shouldBe Some("3")
+      d.param("max-batches") shouldBe Some("10")
+      d.label shouldBe "import target_data"
+      list.head.sql should startWith("insert into target_data(id)")
+    }
+
+    it("keep comments attached to statements") {
+      val list = OracleParser.parse(
+        """-- install the sequence utility
+prompt 安装更新sequence起始值的脚本...
+-- @loop batch-size=100 import target_data
+insert into target_data(id) select s.id from source_data s;
+""")
+      list(0).comments shouldBe Seq("-- install the sequence utility")
+      list(1).directive(Directive.Loop).get.param("batch-size") shouldBe Some("100")
+      list(1).comments shouldBe Seq("-- @loop batch-size=100 import target_data")
     }
   }
 }

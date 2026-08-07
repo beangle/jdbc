@@ -2,33 +2,34 @@ import org.beangle.parent.Dependencies.*
 import org.beangle.parent.Settings.*
 import sbt.Keys.libraryDependencies
 
-ThisBuild / organization := "org.beangle.jdbc"
-ThisBuild / version := "1.1.11-SNAPSHOT"
-ThisBuild / scmInfo := Some(
+organization := "org.beangle.jdbc"
+version := "1.1.11-SNAPSHOT"
+scmInfo := Some(
   ScmInfo(
-    url("https://github.com/beangle/jdbc"),
+    uri("https://github.com/beangle/jdbc"),
     "scm:git@github.com:beangle/jdbc.git"
   )
 )
 
-ThisBuild / developers := List(
+developers := List(
   Developer(
     id = "chaostone",
     name = "Tihua Duan",
     email = "duantihua@gmail.com",
-    url = url("http://github.com/duantihua")
+    url = uri("http://github.com/duantihua")
   )
 )
 
-ThisBuild / description := "The Beangle Jdbc Library"
-ThisBuild / homepage := Some(url("https://beangle.github.io/jdbc/index.html"))
+description := "The Beangle Jdbc Library"
+homepage := Some(uri("https://beangle.github.io/jdbc/index.html"))
 
-val beangle_commons = "org.beangle.commons" % "beangle-commons" % "6.2.1"
+val beangle_commons = "org.beangle.commons" % "beangle-commons" % "6.2.2"
 
 lazy val root = (project in file("."))
   .settings(
     name := "beangle-jdbc",
     common,
+    Compile / mainClass := Some("org.beangle.jdbc.script.Main"),
     libraryDependencies ++= Seq(beangle_commons, slf4j, logback_classic % "test", scalatest),
     libraryDependencies ++= Seq(HikariCP % "optional", h2 % "test", postgresql % "optional")
   )
