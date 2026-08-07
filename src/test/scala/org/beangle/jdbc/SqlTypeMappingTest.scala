@@ -18,6 +18,7 @@
 package org.beangle.jdbc
 
 import org.beangle.commons.lang.annotation.value
+import org.beangle.commons.lang.math.{Decimal5, TinyDecimal5}
 import org.beangle.jdbc.engine.Engines
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
@@ -31,6 +32,18 @@ class SqlTypeMappingTest extends AnyFunSpec, Matchers {
       assert(mapping.sqlCode(classOf[Terms]) == Types.SMALLINT)
       assert(mapping.sqlCode(Meta.A.getClass) == Types.INTEGER)
       assert(mapping.sqlCode(classOf[Array[Byte]]) == Types.VARBINARY)
+    }
+
+    it("maps Decimal5 and TinyDecimal5 to DECIMAL") {
+      val mapping = new DefaultSqlTypeMapping(Engines.forName("h2"))
+      mapping.sqlCode(classOf[Decimal5]) shouldBe Types.DECIMAL
+      mapping.sqlCode(classOf[TinyDecimal5]) shouldBe Types.DECIMAL
+
+      mapping.sqlCode(Decimal5.of("12.34567").getClass) shouldBe Types.DECIMAL
+      mapping.sqlCode(TinyDecimal5.of("12.34567").getClass) shouldBe Types.DECIMAL
+
+      mapping.sqlType(classOf[Decimal5]).code shouldBe Types.DECIMAL
+      mapping.sqlType(classOf[TinyDecimal5]).code shouldBe Types.DECIMAL
     }
   }
 }

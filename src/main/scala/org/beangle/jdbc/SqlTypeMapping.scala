@@ -20,6 +20,7 @@ package org.beangle.jdbc
 import org.beangle.commons.json.{Json, JsonArray, JsonObject}
 import org.beangle.commons.lang.Enums
 import org.beangle.commons.lang.annotation.value
+import org.beangle.commons.lang.math.{Decimal5, TinyDecimal5}
 import org.beangle.commons.lang.time.{HourMinute, WeekState}
 import org.beangle.jdbc.engine.Engine
 import org.beangle.jdbc.meta.SqlType
@@ -59,6 +60,8 @@ class DefaultSqlTypeMapping(engine: Engine) extends SqlTypeMapping {
     (classOf[Double], DOUBLE),
     (classOf[java.lang.Double], DOUBLE),
     (classOf[BigDecimal], DECIMAL),
+    (classOf[Decimal5], DECIMAL),
+    (classOf[TinyDecimal5], DECIMAL),
 
     (classOf[Char], CHAR),
     (classOf[Character], CHAR),
@@ -133,7 +136,13 @@ class DefaultSqlTypeMapping(engine: Engine) extends SqlTypeMapping {
   }
 
   def sqlType(clazz: Class[_]): SqlType = {
-    val sqlTypeCode = sqlCode(clazz)
-    if (sqlTypeCode == VARCHAR) engine.toType(sqlTypeCode, 255) else engine.toType(sqlTypeCode)
+    if (clazz == classOf[Decimal5]) {
+      engine.toType(DECIMAL, 19, 5)
+    } else if (clazz == classOf[TinyDecimal5]) {
+      engine.toType(DECIMAL, 10, 5)
+    } else {
+      val sqlTypeCode = sqlCode(clazz)
+      if sqlTypeCode == VARCHAR then engine.toType(sqlTypeCode, 255) else engine.toType(sqlTypeCode)
+    }
   }
 }
