@@ -36,7 +36,7 @@ object Engines {
     }
   }
 
-  register(new PostgreSQL10, new MySQL5, new H2, new Oracle10g, new Oracle12c, new DB2V8, new SQLServer2005,
+  register(new PostgreSQL10, new MySQL5, new H2, new DuckDB, new Oracle10g, new Oracle12c, new DB2V8, new SQLServer2005,
     new SQLServer2008, new SQLServer2012, new Derby10)
 
   def forDataSource(ds: DataSource): Engine = {
@@ -62,7 +62,9 @@ object Engines {
           name2Engines("DB2")
         } else if (dbname.toUpperCase.startsWith("SQLSERVER") || dbname.startsWith("Microsoft SQL Server")) {
           name2Engines("Microsoft SQL Server")
-        } else List.empty
+        } else
+          // Allow multi-uppercase engine names (e.g. DuckDB) to resolve from lowercased driver prefixes.
+          name2Engines.find(e => e._1.equalsIgnoreCase(name)).map(_._2).getOrElse(List.empty)
     }
     if version == "last" then
       engineList.last

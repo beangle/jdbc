@@ -31,5 +31,6 @@ lazy val root = (project in file("."))
     common,
     Compile / mainClass := Some("org.beangle.jdbc.script.Main"),
     libraryDependencies ++= Seq(beangle_commons, slf4j, logback_classic % "test", scalatest),
-    libraryDependencies ++= Seq(HikariCP % "optional", h2 % "test", postgresql % "optional")
+    libraryDependencies ++= Seq(HikariCP % "optional", h2 % "test", postgresql % "optional",
+      "org.duckdb" % "duckdb_jdbc" % "1.5.5.1" % "test")
   )

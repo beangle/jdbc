@@ -47,6 +47,8 @@ object Drivers {
     driver("h2", "org.h2.jdbcx.JdbcDataSource",
       "org.h2.Driver", "[file:][<path>]<database_name>", "mem:<database_name>",
       "tcp://<server>[:<port>]/[<path>]<database_name>"),
+    driver("duckdb", "org.duckdb.DuckDBDataSource",
+      "org.duckdb.DuckDBDriver", "[<path>]<database_name>", ":memory:"),
     driver("db2", "com.ibm.db2.jcc.DB2SimpleDataSource",
       "com.ibm.db2.jcc.DB2Driver", "//<host>[:<port>]/<database_name>", "<database_name>"),
     driver("derby", "org.apache.derby.jdbc.ClientDataSource",
