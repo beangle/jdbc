@@ -34,6 +34,9 @@ import org.beangle.jdbc.query.JdbcExecutor
  *  - PostgreSQL 驱动（`% optional` 依赖）：`HikariDataSource` 按
  *    `dataSourceClassName` 反射创建 `PGSimpleDataSource` 并经 `DriverManager`
  *    取连接，驱动内部还有 `Class.forName` 与字段反射
+ *  - MySQL/Oracle 驱动（可选引入，classpath 存在时生效）：`Class.forName`
+ *    注册驱动、`dataSourceClassName` 反射创建数据源，以及连接/语句/结果集
+ *    等运行期反射类
  *  - 资源：`org/beangle/jdbc/engine/keywords/.*`（各数据库保留字清单，
  *    [[org.beangle.jdbc.engine.Engine.loadKeywords]] 经 ClassLoader 加载），
  *    `org/postgresql/driverconfig.properties`（PG 驱动静态块读取）
@@ -58,6 +61,8 @@ class JdbcAotHints extends AotHintRegistrar {
     hints.registerType(classOf[JdbcExecutor.type])
     registerPool()
     registerPostgresql()
+    registerMysql()
+    registerOracle()
     hints.registerPattern("org/beangle/jdbc/engine/keywords/.*")
   }
 
@@ -66,6 +71,7 @@ class JdbcAotHints extends AotHintRegistrar {
     val loader = getClass.getClassLoader
     ClassLoaders.get("com.zaxxer.hikari.HikariConfig", loader) foreach { _ =>
       hints.registerType(classOf[HikariConfig], fullPolicy)
+      ClassLoaders.get("com.zaxxer.hikari.HikariConfigMXBean", loader) foreach (hints.registerType(_, fullPolicy))
       // PoolBase/PoolEntry 为 private[pool]，运行期仍会反射访问其字段，按名注册
       ClassLoaders.get("com.zaxxer.hikari.pool.PoolBase", loader) foreach (hints.registerType(_, fullPolicy))
       ClassLoaders.get("com.zaxxer.hikari.pool.PoolEntry", loader) foreach (hints.registerType(_, fullPolicy))
@@ -94,5 +100,38 @@ class JdbcAotHints extends AotHintRegistrar {
       hints.registerType(classOf[org.postgresql.util.PGobject], fullPolicy)
       hints.registerPattern("org/postgresql/driverconfig\\.properties")
     }
+  }
+
+  /** MySQL 驱动（mysql-connector-j）：dataSourceClassName 反射创建、
+   *  DriverManager 驱动注册、连接/语句/结果集反射。 */
+  private def registerMysql(): Unit = {
+    val loader = getClass.getClassLoader
+    val classes = List(
+      "com.mysql.cj.jdbc.Driver",
+      "com.mysql.cj.jdbc.MysqlDataSource",
+      "com.mysql.cj.jdbc.ConnectionImpl",
+      "com.mysql.cj.jdbc.StatementImpl",
+      "com.mysql.cj.jdbc.ClientPreparedStatement",
+      "com.mysql.cj.jdbc.result.ResultSetImpl",
+      "com.mysql.cj.NativeSession",
+      "com.mysql.cj.protocol.a.NativeProtocol")
+    classes foreach { cn => ClassLoaders.get(cn, loader) foreach (hints.registerType(_, fullPolicy)) }
+    if (ClassLoaders.get("com.mysql.cj.jdbc.Driver", loader).nonEmpty)
+      hints.registerPattern("com/mysql/cj/LocalizedErrorMessages\\.properties")
+  }
+
+  /** Oracle 驱动（ojdbc）：dataSourceClassName 反射创建、DriverManager
+   *  驱动注册、thin 连接/语句反射。 */
+  private def registerOracle(): Unit = {
+    val loader = getClass.getClassLoader
+    val classes = List(
+      "oracle.jdbc.OracleDriver",
+      "oracle.jdbc.pool.OracleDataSource",
+      "oracle.jdbc.OracleConnection",
+      "oracle.jdbc.driver.PhysicalConnection",
+      "oracle.jdbc.driver.T4CConnection",
+      "oracle.jdbc.driver.OracleStatement",
+      "oracle.jdbc.driver.OraclePreparedStatement")
+    classes foreach { cn => ClassLoaders.get(cn, loader) foreach (hints.registerType(_, fullPolicy)) }
   }
 }
