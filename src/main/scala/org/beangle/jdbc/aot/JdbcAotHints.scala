@@ -46,17 +46,6 @@ import org.beangle.jdbc.query.JdbcExecutor
  */
 class JdbcAotHints extends AotHintRegistrar {
 
-  /** 连接池/驱动类运行期反射面：构造器（Class.forName + newInstance）、
-   *  public/declared 方法与字段（PropertyElf 的 getMethods/setter.invoke、
-   *  直接字段 get/set）。 */
-  private val fullPolicy = AotPolicy(Set(
-    AotPolicy.Category.PublicMethods,
-    AotPolicy.Category.DeclaredMethods,
-    AotPolicy.Category.PublicConstructors,
-    AotPolicy.Category.DeclaredConstructors,
-    AotPolicy.Category.PublicFields,
-    AotPolicy.Category.DeclaredFields))
-
   override def registering(): Unit = {
     hints.registerType(classOf[JdbcExecutor.type])
     registerPool()
@@ -70,11 +59,11 @@ class JdbcAotHints extends AotHintRegistrar {
   private def registerPool(): Unit = {
     val loader = getClass.getClassLoader
     ClassLoaders.get("com.zaxxer.hikari.HikariConfig", loader) foreach { _ =>
-      hints.registerType(classOf[HikariConfig], fullPolicy)
-      ClassLoaders.get("com.zaxxer.hikari.HikariConfigMXBean", loader) foreach (hints.registerType(_, fullPolicy))
+      hints.registerType(classOf[HikariConfig], AotPolicy.full)
+      ClassLoaders.get("com.zaxxer.hikari.HikariConfigMXBean", loader) foreach (hints.registerType(_, AotPolicy.full))
       // PoolBase/PoolEntry 为 private[pool]，运行期仍会反射访问其字段，按名注册
-      ClassLoaders.get("com.zaxxer.hikari.pool.PoolBase", loader) foreach (hints.registerType(_, fullPolicy))
-      ClassLoaders.get("com.zaxxer.hikari.pool.PoolEntry", loader) foreach (hints.registerType(_, fullPolicy))
+      ClassLoaders.get("com.zaxxer.hikari.pool.PoolBase", loader) foreach (hints.registerType(_, AotPolicy.full))
+      ClassLoaders.get("com.zaxxer.hikari.pool.PoolEntry", loader) foreach (hints.registerType(_, AotPolicy.full))
       // FastList 经 Array.newInstance 反射创建元素数组（PoolEntry 的
       // Statement[]、ConcurrentBag 的 IConcurrentBagEntry[]），数组类需
       // 注册并标记 unsafeAllocated
@@ -91,13 +80,13 @@ class JdbcAotHints extends AotHintRegistrar {
   private def registerPostgresql(): Unit = {
     val loader = getClass.getClassLoader
     if (ClassLoaders.get("org.postgresql.Driver", loader).nonEmpty) {
-      hints.registerType(classOf[org.postgresql.Driver], fullPolicy)
-      hints.registerType(classOf[org.postgresql.ds.PGSimpleDataSource], fullPolicy)
-      hints.registerType(classOf[org.postgresql.ds.common.BaseDataSource], fullPolicy)
-      hints.registerType(classOf[org.postgresql.core.v3.ConnectionFactoryImpl], fullPolicy)
-      hints.registerType(classOf[org.postgresql.core.QueryExecutorCloseAction], fullPolicy)
-      hints.registerType(classOf[org.postgresql.jdbc.PgStatement], fullPolicy)
-      hints.registerType(classOf[org.postgresql.util.PGobject], fullPolicy)
+      hints.registerType(classOf[org.postgresql.Driver], AotPolicy.full)
+      hints.registerType(classOf[org.postgresql.ds.PGSimpleDataSource], AotPolicy.full)
+      hints.registerType(classOf[org.postgresql.ds.common.BaseDataSource], AotPolicy.full)
+      hints.registerType(classOf[org.postgresql.core.v3.ConnectionFactoryImpl], AotPolicy.full)
+      hints.registerType(classOf[org.postgresql.core.QueryExecutorCloseAction], AotPolicy.full)
+      hints.registerType(classOf[org.postgresql.jdbc.PgStatement], AotPolicy.full)
+      hints.registerType(classOf[org.postgresql.util.PGobject], AotPolicy.full)
       hints.registerPattern("org/postgresql/driverconfig\\.properties")
     }
   }
@@ -115,7 +104,7 @@ class JdbcAotHints extends AotHintRegistrar {
       "com.mysql.cj.jdbc.result.ResultSetImpl",
       "com.mysql.cj.NativeSession",
       "com.mysql.cj.protocol.a.NativeProtocol")
-    classes foreach { cn => ClassLoaders.get(cn, loader) foreach (hints.registerType(_, fullPolicy)) }
+    classes foreach { cn => ClassLoaders.get(cn, loader) foreach (hints.registerType(_, AotPolicy.full)) }
     if (ClassLoaders.get("com.mysql.cj.jdbc.Driver", loader).nonEmpty)
       hints.registerPattern("com/mysql/cj/LocalizedErrorMessages\\.properties")
   }
@@ -132,6 +121,6 @@ class JdbcAotHints extends AotHintRegistrar {
       "oracle.jdbc.driver.T4CConnection",
       "oracle.jdbc.driver.OracleStatement",
       "oracle.jdbc.driver.OraclePreparedStatement")
-    classes foreach { cn => ClassLoaders.get(cn, loader) foreach (hints.registerType(_, fullPolicy)) }
+    classes foreach { cn => ClassLoaders.get(cn, loader) foreach (hints.registerType(_, AotPolicy.full)) }
   }
 }

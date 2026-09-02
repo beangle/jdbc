@@ -23,7 +23,7 @@ developers := List(
 description := "The Beangle Jdbc Library"
 homepage := Some(uri("https://beangle.github.io/jdbc/index.html"))
 
-val beangle_commons = "org.beangle.commons" % "beangle-commons" % "6.3.0"
+val beangle_commons = "org.beangle.commons" % "beangle-commons" % "6.3.2"
 
 lazy val root = (project in file("."))
   .settings(
