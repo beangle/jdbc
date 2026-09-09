@@ -261,7 +261,10 @@ class JdbcExecutor(dataSource: DataSource) {
       val cm = new CopyManager(conn.unwrap(classOf[BaseConnection]))
       var copySql = sql.replaceFirst("(?i)^insert(\\s*) into", "copy")
       copySql = Strings.substringBefore(copySql, "values")
-      copySql += " FROM STDIN delimiter ',' csv encoding 'UTF-8'  escape ''''" //single '
+      // Default CSV QUOTE/ESCAPE are both '"' (quotes are doubled). Do not set
+      // ESCAPE to "'" — apostrophes in quoted fields would swallow the closing quote.
+      // https://www.postgresql.org/docs/current/sql-copy.html
+      copySql += " FROM STDIN delimiter ',' csv encoding 'UTF-8'"
       cm.copyIn(copySql, new PostgresCsvReader(datas.iterator, types))
       conn.commit()
     } finally {

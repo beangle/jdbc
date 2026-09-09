@@ -18,7 +18,6 @@
 package org.beangle.jdbc.query
 
 import org.beangle.commons.conversion.string.BooleanConverter
-import org.beangle.commons.lang.Strings
 
 import java.io.Reader
 import java.time.format.DateTimeFormatter
@@ -38,22 +37,16 @@ class PostgresCsvReader(itor: Iterator[Array[_]], types: collection.Seq[Int]) ex
   private val sqlTypes = types.toArray
 
   override def read(cbuf: Array[Char], off: Int, len: Int): Int = {
-    if (itor.hasNext) {
-      if (0 == bufLen) {
-        val data = itor.next()
-        if (null == data) {
-          -1
-        } else {
-          makeString(data, sqlTypes)
-          index = 0
-          copy(cbuf, off, len)
-        }
-      } else {
-        copy(cbuf, off, len)
-      }
-    } else {
-      -1
+    // Drain leftover bytes first. The last row may still be in `buffer` after
+    // the iterator is exhausted; CopyManager reads in chunks (typically 64KiB).
+    if (0 == bufLen) {
+      if (!itor.hasNext) return -1
+      val data = itor.next()
+      if (null == data) return -1
+      makeString(data, sqlTypes)
+      index = 0
     }
+    copy(cbuf, off, len)
   }
 
   private def copy(cbuf: Array[Char], off: Int, len: Int): Int = {
@@ -86,21 +79,11 @@ class PostgresCsvReader(itor: Iterator[Array[_]], types: collection.Seq[Int]) ex
           case b: Boolean => sb.append(if b then "t," else "f,")
           case i: Instant => sb.append(instantFormatter.format(i.atOffset(zoneOffset))).append(',')
           case s: String =>
-            val str = Strings.replace(s, "\"", "'\"")
-            val res = if (s.isEmpty) {
-              "\"\""
-            } else if (str.length > s.length) {
-              s""""${str}""""
-            } else if (str.contains(",")) {
-              s""""${str}""""
-            } else if (s.contains("\n")) {
-              s""""${str}""""
-            } else {
-              str
-            }
-            sb.append(res).append(',')
-
-          case a: Any => sb.append(a.toString).append(',')
+            appendCsvField(sb, s)
+            sb.append(',')
+          case a: Any =>
+            appendCsvField(sb, a.toString)
+            sb.append(',')
         }
       }
     }
@@ -110,6 +93,38 @@ class PostgresCsvReader(itor: Iterator[Array[_]], types: collection.Seq[Int]) ex
     if buffer.length < len then buffer = new Array[Char](len)
     sb.getChars(0, len, buffer, 0)
     bufLen = len
+  }
+
+  /** Quote a field per PostgreSQL COPY CSV rules (QUOTE '"', ESCAPE '"').
+   *
+   * Quote empty values (to distinguish from NULL) and values containing the
+   * delimiter, quote, CR, or LF. Double any quote characters inside the field.
+   *
+   * @see https://www.postgresql.org/docs/current/sql-copy.html
+   */
+  private def appendCsvField(sb: java.lang.StringBuilder, s: String): Unit = {
+    var needsQuote = s.isEmpty
+    if (!needsQuote) {
+      var i = 0
+      while (i < s.length && !needsQuote) {
+        val c = s.charAt(i)
+        needsQuote = c == ',' || c == '"' || c == '\n' || c == '\r'
+        i += 1
+      }
+    }
+    if (needsQuote) {
+      sb.append('"')
+      var i = 0
+      while (i < s.length) {
+        val c = s.charAt(i)
+        if (c == '"') sb.append('"')
+        sb.append(c)
+        i += 1
+      }
+      sb.append('"')
+    } else {
+      sb.append(s)
+    }
   }
 
   override def close(): Unit = {}
