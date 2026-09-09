@@ -6,6 +6,7 @@ All notable changes to this project are documented in this file.
 
 ### Fixed
 - PostgreSQL COPY CSV: quote CR/LF/comma/quote fields and double internal quotes (default ESCAPE `"`). The previous `ESCAPE '\''` encoding dropped closing quotes when a field contained `'`, and left bare carriage returns unquoted.
+- Compare engine version ranges numerically so MySQL `[5.5,)` matches `8.0` / `12.1` (string compare treated `"12.1"` as less than `"5.5"`).
 
 ## [1.1.12] - 2026-08-07
 

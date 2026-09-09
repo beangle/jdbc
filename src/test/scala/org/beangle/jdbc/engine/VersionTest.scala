@@ -28,7 +28,7 @@ class VersionTest extends AnyFlatSpec, Matchers {
     version.contains("1.0.1") should be(true)
     version.contains("1.5.2") should be(true)
     version.contains("2.0") should be(true)
-    version.contains("0.9.beta") should be(false)
+    version.contains("0.9") should be(false)
     version.contains("2.0.1") should be(false)
   }
 
@@ -51,5 +51,14 @@ class VersionTest extends AnyFlatSpec, Matchers {
     version.contains("2.3.5") should be(true)
     version.contains("2.3") should be(true)
     version.contains("2.5") should be(false)
+  }
+
+  "MySQL range [5.5,)" should "include two-digit major versions such as 12.1" in {
+    val version = Version("[5.5,)")
+    version.contains("5.1") should be(false)
+    version.contains("5.5") should be(true)
+    version.contains("5.5.62") should be(true)
+    version.contains("8.0") should be(true)
+    version.contains("12.1") should be(true)
   }
 }

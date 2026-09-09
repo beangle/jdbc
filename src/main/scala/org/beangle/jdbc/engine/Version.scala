@@ -48,6 +48,27 @@ object Version {
     }
     new Version(start, end, containStart, containEnd)
   }
+
+  /** Compare dotted numeric versions (5.5 < 12.1). Values come from JDBC
+   * major/minor integers, so each segment is an int. Missing trailing
+   * segments are 0 (`5.5` equals `5.5.0`).
+   */
+  private[engine] def compare(left: String, right: String): Int = {
+    val ls = parts(left)
+    val rs = parts(right)
+    val n = math.max(ls.length, rs.length)
+    var i = 0
+    while (i < n) {
+      val a = if i < ls.length then ls(i) else 0
+      val b = if i < rs.length then rs(i) else 0
+      if (a != b) return Integer.compare(a, b)
+      i += 1
+    }
+    0
+  }
+
+  private def parts(v: String): Array[Int] =
+    v.split('.').map(_.toInt)
 }
 
 /**
@@ -60,11 +81,11 @@ class Version(start: String, end: String, containStart: Boolean, containEnd: Boo
 
   def contains(v: String): Boolean = {
     if (Strings.isNotEmpty(start)) {
-      val rs = start.compareTo(v)
+      val rs = Version.compare(start, v)
       if ((!containStart && 0 == rs) || rs > 0) return false
     }
     if (Strings.isNotEmpty(end)) {
-      val rs = end.compareTo(v)
+      val rs = Version.compare(end, v)
       if ((!containEnd && 0 == rs) || rs < 0) return false
     }
     true
