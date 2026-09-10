@@ -206,6 +206,10 @@ trait AbstractDialect extends Dialect {
     null != options.sequence
   }
 
+  override final def supportCommentOn: Boolean = {
+    options.comment.supportsCommentOn
+  }
+
   override def supportMultiValueInsert: Boolean = false
 
   override def setNullAsObject: Boolean = false

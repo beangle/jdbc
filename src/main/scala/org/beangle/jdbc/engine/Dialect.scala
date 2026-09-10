@@ -60,13 +60,15 @@ trait Dialect {
 
   def supportSequence: Boolean
 
+  def supportCommentOn: Boolean
+
   def supportMultiValueInsert: Boolean
 
   def setNullAsObject: Boolean
 
   def supportJsonType: Boolean
 
-  def mkJsonObject(str:String): Object
+  def mkJsonObject(str: String): Object
 }
 
 trait AlterTableDialect(val table: Table) {
