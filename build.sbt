@@ -3,7 +3,7 @@ import org.beangle.parent.Settings.*
 import sbt.Keys.libraryDependencies
 
 organization := "org.beangle.jdbc"
-version := "1.1.15-SNAPSHOT"
+version := "1.1.15"
 scmInfo := Some(
   ScmInfo(
     uri("https://github.com/beangle/jdbc"),
