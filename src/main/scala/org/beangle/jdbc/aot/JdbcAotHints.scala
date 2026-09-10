@@ -37,7 +37,7 @@ import org.beangle.jdbc.query.JdbcExecutor
  *  - MySQL/Oracle 驱动（可选引入，classpath 存在时生效）：`Class.forName`
  *    注册驱动、`dataSourceClassName` 反射创建数据源，以及连接/语句/结果集
  *    等运行期反射类
- *  - 资源：`org/beangle/jdbc/engine/keywords/.*`（各数据库保留字清单，
+ *  - 资源：`org/beangle/jdbc/engine/keywords/` 下各数据库保留字清单（单层 glob 通配，
  *    [[org.beangle.jdbc.engine.Engine.loadKeywords]] 经 ClassLoader 加载），
  *    `org/postgresql/driverconfig.properties`（PG 驱动静态块读取）
  *
@@ -52,7 +52,7 @@ class JdbcAotHints extends AotHintRegistrar {
     registerPostgresql()
     registerMysql()
     registerOracle()
-    hints.registerPattern("org/beangle/jdbc/engine/keywords/.*")
+    hints.registerPattern("org/beangle/jdbc/engine/keywords/*")
   }
 
   /** HikariCP 连接池：HikariConfig 属性反射 + PoolBase/PoolEntry 字段反射。 */
@@ -87,7 +87,7 @@ class JdbcAotHints extends AotHintRegistrar {
       hints.registerType(classOf[org.postgresql.core.QueryExecutorCloseAction], AotPolicy.full)
       hints.registerType(classOf[org.postgresql.jdbc.PgStatement], AotPolicy.full)
       hints.registerType(classOf[org.postgresql.util.PGobject], AotPolicy.full)
-      hints.registerPattern("org/postgresql/driverconfig\\.properties")
+      hints.registerPattern("org/postgresql/driverconfig.properties")
     }
   }
 
@@ -106,7 +106,7 @@ class JdbcAotHints extends AotHintRegistrar {
       "com.mysql.cj.protocol.a.NativeProtocol")
     classes foreach { cn => ClassLoaders.get(cn, loader) foreach (hints.registerType(_, AotPolicy.full)) }
     if (ClassLoaders.get("com.mysql.cj.jdbc.Driver", loader).nonEmpty)
-      hints.registerPattern("com/mysql/cj/LocalizedErrorMessages\\.properties")
+      hints.registerPattern("com/mysql/cj/LocalizedErrorMessages.properties")
   }
 
   /** Oracle 驱动（ojdbc）：dataSourceClassName 反射创建、DriverManager
