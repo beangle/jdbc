@@ -36,6 +36,7 @@ abstract class Relation(var schema: Schema, var name: Identifier) extends Ordere
       col.name = col.name.attach(engine)
     }
     this.name = this.name.attach(engine)
+    engine.adjust(this)
     this
   }
 

@@ -20,7 +20,7 @@ package org.beangle.jdbc.engine
 import org.beangle.commons.collection.Collections
 import org.beangle.commons.io.IOs
 import org.beangle.commons.lang.{ClassLoaders, Strings}
-import org.beangle.jdbc.meta.{Identifier, MetadataLoadSql, SqlType}
+import org.beangle.jdbc.meta.{Identifier, MetadataLoadSql, Relation, SqlType}
 
 object Engine {
   val reservedWords: Set[String] = loadKeywords("sql-reserved.txt")
@@ -136,6 +136,11 @@ trait Engine extends Dialect {
   }
 
   def convert(sqlType: SqlType, value: String): Option[String]
+
+  /** Table-level adaptation after [[org.beangle.jdbc.meta.Relation.attach]] remaps each column.
+   * Engines may rewrite types that cannot be decided per-column (e.g. MySQL row size).
+   */
+  def adjust(relation: Relation): Unit = {}
 
   def supportBoolean: Boolean
 

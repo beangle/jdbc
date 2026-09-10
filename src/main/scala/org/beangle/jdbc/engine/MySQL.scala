@@ -20,7 +20,7 @@ package org.beangle.jdbc.engine
 import org.beangle.commons.lang.Strings
 import org.beangle.jdbc.SqlTypes.*
 import org.beangle.jdbc.meta.TableType.{InMemory, Temporary}
-import org.beangle.jdbc.meta.{Index, Table, TableType}
+import org.beangle.jdbc.meta.{Column, Index, Relation, Table, TableType}
 
 import java.sql.Types.*
 
@@ -127,5 +127,75 @@ class MySQL5 extends AbstractEngine {
       case InMemory => ("", "ENGINE=MEMORY")
       case _ => super.createTableOptions(tableType)
     }
+  }
+
+  /** Called from Relation.attach after per-column mapping.
+   * MySQL row size (excluding TEXT/BLOB payload) cannot exceed 65535 bytes.
+   * utf8mb4 `varchar(500)` is ~2002 bytes in-row; many such columns overflow.
+   *
+   * @see https://dev.mysql.com/doc/refman/8.4/en/column-count-limit.html
+   */
+  override def adjust(relation: Relation): Unit = {
+    fitVarcharRowSize(relation)
+  }
+
+  /** MySQL maximum row size, not counting TEXT/BLOB payloads.
+   *
+   * @see https://dev.mysql.com/doc/refman/8.4/en/column-count-limit.html
+   */
+  private val MaxInRowBytes = 65535
+
+  /** Rewrite the widest in-row VARCHAR/CHAR columns to TEXT (`toType(VARCHAR, 65535)`)
+   * until the estimated row size fits under [[MaxInRowBytes]].
+   * Leave a 64-byte slack for null bits and other InnoDB overhead.
+   */
+  private def fitVarcharRowSize(relation: Relation): Unit = {
+    val bpc = charsetBytes(relation)
+    while (relation.columns.map(c => inRowBytes(c, bpc)).sum > MaxInRowBytes - 64) {
+      val widest = relation.columns.filter(isInRowVarchar).maxByOption(_.sqlType.precision.getOrElse(0))
+      widest match {
+        case None => return
+        case Some(col) => col.sqlType = toType(VARCHAR, 65535)
+      }
+    }
+  }
+
+  /** Max bytes per character for the table's database encoding.
+   * Default utf8mb4 (4). utf8/utf8mb3 is 3; GBK/GB2312/Big5 is 2.
+   *
+   * @see https://dev.mysql.com/doc/refman/8.4/en/charset-unicode.html
+   */
+  private def charsetBytes(relation: Relation): Int = {
+    val enc = Option(relation.schema.database.encoding).getOrElse("utf8mb4").toLowerCase
+    if (enc.contains("utf8mb4") || enc.contains("utf-8")) 4
+    else if (enc.contains("utf8")) 3
+    else if (enc.contains("gbk") || enc.contains("gb2312") || enc.contains("big5")) 2
+    else 4
+  }
+
+  /** Columns whose declared max length is stored in-row (not TEXT/BLOB).
+   * These are the candidates that can be demoted when the row is too wide.
+   */
+  private def isInRowVarchar(col: Column): Boolean = {
+    val name = col.sqlType.name.toLowerCase
+    (name.startsWith("varchar") || name.startsWith("char") || name.startsWith("nvarchar")) &&
+      !name.contains("text")
+  }
+
+  /** Estimated contribution of one column to the MySQL 65535-byte row limit.
+   * TEXT/BLOB/JSON count as ~12 bytes (off-page pointer). VARCHAR/CHAR use
+   * `precision * bytesPerChar` plus a 1-byte or 2-byte length prefix
+   * (2 bytes when the byte length exceeds 255). Other types use 8 as a
+   * conservative stand-in for ints/dates.
+   *
+   * @see https://dev.mysql.com/doc/refman/8.4/en/storage-requirements.html
+   */
+  private def inRowBytes(col: Column, bpc: Int): Int = {
+    val name = col.sqlType.name.toLowerCase
+    if (name.contains("text") || name.contains("blob") || name.contains("json")) 12
+    else if (isInRowVarchar(col)) {
+      val data = col.sqlType.precision.getOrElse(255) * bpc
+      data + (if data > 255 then 2 else 1)
+    } else 8
   }
 }

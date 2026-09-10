@@ -6,6 +6,7 @@ All notable changes to this project are documented in this file.
 
 ### Fixed
 - Quote reserved column names with the target engine's quote chars in `COMMENT ON COLUMN` (`"rank"` on PostgreSQL, not MySQL-style `` `rank` ``).
+- Demote the widest MySQL `varchar` columns to `text` in `Relation.attach` / `Engine.adjust` when the in-row size would exceed 65535 bytes.
 
 ## [1.1.15-SNAPSHOT]
 
