@@ -110,7 +110,7 @@ trait AbstractDialect extends Dialect {
       if (includeMissing) {
         comments += ("comment on table " + tableName + " is '" + tableComment + "'")
         table.columns foreach { c =>
-          comments += ("comment on column " + tableName + '.' + c.name + " is '" + c.comment.getOrElse(s"${c.name}?") + "'")
+          comments += ("comment on column " + tableName + '.' + c.name.toLiteral(this) + " is '" + c.comment.getOrElse(s"${c.name.value}?") + "'")
         }
       } else {
         table.comment foreach { c =>
@@ -118,7 +118,7 @@ trait AbstractDialect extends Dialect {
         }
         table.columns foreach { c =>
           c.comment foreach { cc =>
-            comments += ("comment on column " + tableName + '.' + c.name + " is '" + cc + "'")
+            comments += ("comment on column " + tableName + '.' + c.name.toLiteral(this) + " is '" + cc + "'")
           }
         }
       }

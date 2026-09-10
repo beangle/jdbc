@@ -78,4 +78,18 @@ class TableTest extends AnyFlatSpec, Matchers {
     table.name.value should equal("USER")
     cloned.name.value should equal("user")
   }
+
+  "commentsOnTable" should "quote reserved columns for the target engine" in {
+    val database = new Database(postgresql)
+    val schema = database.getOrCreateSchema("zsdx")
+    val table = new Table(schema, Identifier("t_vst_member"))
+    val rank = new Column(Identifier("rank", true), postgresql.toType(Types.VARCHAR, 20))
+    rank.comment = Some("行政级别")
+    table.add(rank)
+    table.attach(postgresql)
+
+    val sqls = postgresql.commentsOnTable(table, false)
+    sqls.exists(_.contains("""zsdx.t_vst_member."rank"""")) should be(true)
+    sqls.exists(_.contains("`rank`")) should be(false)
+  }
 }

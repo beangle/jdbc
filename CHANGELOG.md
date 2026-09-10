@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented in this file.
 
+## [1.1.16-SNAPSHOT]
+
+### Fixed
+- Quote reserved column names with the target engine's quote chars in `COMMENT ON COLUMN` (`"rank"` on PostgreSQL, not MySQL-style `` `rank` ``).
+
 ## [1.1.15-SNAPSHOT]
 
 ### Fixed
