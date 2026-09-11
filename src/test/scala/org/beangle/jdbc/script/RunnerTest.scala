@@ -58,5 +58,33 @@ where not exists(select 1 from target_data t where t.id=s.id)
         verify.close()
       }
     }
+
+    it("executes DML statements with JDBC update counts") {
+      val ds = new JdbcDataSource
+      ds.setURL("jdbc:h2:mem:runner_dml;DB_CLOSE_DELAY=-1")
+      val conn = ds.getConnection
+      try conn.createStatement().execute("create table staffs(code varchar(20), department_id int)")
+      finally conn.close()
+
+      val sql =
+        """insert into staffs values('298437', 1);
+          |update staffs set department_id=9 where code in('298437');
+          |delete from staffs where code in('missing');
+          |""".stripMargin
+      val counts = collection.mutable.ListBuffer.empty[Int]
+      Runner.execute(ds, new Parser().parse(sql), ignoreError = false, onUpdate = { (_, n, _) =>
+        counts += n
+      }) shouldBe true
+      counts.toList shouldBe List(1, 1, 0)
+
+      val verify = ds.getConnection
+      try {
+        val rs = verify.createStatement().executeQuery("select department_id from staffs where code='298437'")
+        rs.next() shouldBe true
+        rs.getInt(1) shouldBe 9
+      } finally {
+        verify.close()
+      }
+    }
   }
 }

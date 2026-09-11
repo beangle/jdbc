@@ -27,8 +27,10 @@ import javax.sql.DataSource
 object Runner {
 
   /** Execute parsed statements against a datasource.
-   *  Returns true if every statement succeeded; with ignoreError=false failures are rethrown. */
-  def execute(dataSource: DataSource, statements: Seq[Statement], ignoreError: Boolean): Boolean = {
+    *  Returns true if every statement succeeded; with ignoreError=false failures are rethrown.
+    *  `onUpdate` receives each non-loop statement's JDBC update count (`-1` for a result set). */
+  def execute(dataSource: DataSource, statements: Seq[Statement], ignoreError: Boolean,
+              onUpdate: (Statement, Int, Stopwatch) => Unit = (_, _, _) => ()): Boolean = {
     val watch = new Stopwatch(true)
     val conn = dataSource.getConnection()
     conn.setAutoCommit(true)
@@ -46,7 +48,9 @@ object Runner {
           try {
             statement.directive(Directive.Loop) match {
               case Some(d) => executeLoop(stm, statement.sql, d)
-              case None => stm.execute(statement.sql)
+              case None =>
+                val sw = new Stopwatch(true)
+                onUpdate(statement, executeOne(stm, statement.sql), sw)
             }
           } catch {
             case e: Exception =>
@@ -61,6 +65,18 @@ object Runner {
     }
     JdbcLogger.info(s"exec sql using $watch")
     success
+  }
+
+  /** Run one statement and return its JDBC update count.
+    *
+    * `Statement.execute` returns false when the result is an update count (or no result);
+    * `getUpdateCount` is that count, or `-1` when there is no count.
+    * @see https://docs.oracle.com/en/java/javase/21/docs/api/java.sql/java/sql/Statement.html#execute(java.lang.String)
+    * @see https://docs.oracle.com/en/java/javase/21/docs/api/java.sql/java/sql/Statement.html#getUpdateCount()
+    */
+  private def executeOne(stm: java.sql.Statement, sql: String): Int = {
+    val query = stm.execute(sql)
+    if query then -1 else stm.getUpdateCount
   }
 
   /** Execute an `@loop` INSERT...SELECT in committed batches with an auto appended LIMIT. */
