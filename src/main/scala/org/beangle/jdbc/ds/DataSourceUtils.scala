@@ -77,7 +77,7 @@ object DataSourceUtils {
 
   private def buildProperties(driver: String, username: String, password: String, props: collection.Map[String, String]): ju.Properties = {
     val ps = new ju.Properties
-    val writables = BeanInfos.get(classOf[HikariConfig]).writables.keySet
+    val writables = BeanInfos.get(classOf[HikariConfig]).writables
 
     props.foreach { e =>
       var key = if (e._1 == "url") "jdbcUrl" else e._1
