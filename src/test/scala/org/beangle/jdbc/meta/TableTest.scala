@@ -54,6 +54,9 @@ class TableTest extends AnyFlatSpec, Matchers {
     println(postgresql.createTable(table))
     assert("create table TEST.\"user\" (name varchar(30) not null," +
       " id bigint not null, enabled boolean not null, age integer not null)" == postgresql.createTable(table))
+    table.sortColumns
+    assert("create table TEST.\"user\" (id bigint not null," +
+      " age integer not null, enabled boolean not null, name varchar(30) not null)" == postgresql.createTable(table))
   }
 
   "postgresql " should " attach to oracle" in {

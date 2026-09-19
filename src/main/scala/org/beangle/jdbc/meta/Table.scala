@@ -61,6 +61,15 @@ class Table(s: Schema, n: Identifier) extends Relation(s, n) {
       foreignKeys.exists(_.name.quoted)
   }
 
+  /** 主键列置顶、其余列按名称升序,主键列之间也按名称升序 */
+  override def sortColumns: this.type = {
+    val pkNames = primaryKey.map(_.columns.toSet).getOrElse(Set.empty[Identifier])
+    val (keys, others) = columns.toList.partition(c => pkNames.contains(c.name))
+    columns.clear()
+    columns ++= (keys.sortBy(_.name.value) ++ others.sortBy(_.name.value))
+    this
+  }
+
   override def attach(engine: Engine): this.type = {
     super.attach(engine)
     primaryKey foreach (pk => pk.attach(engine))

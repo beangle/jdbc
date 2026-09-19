@@ -127,7 +127,7 @@ object Serializer {
       val tableNode = tablesNode.append("table", "name" -> table.name)
       tableNode.set("comment", table.commentAndModule)
       val columnsNode = tableNode.append("columns")
-      val columns = table.columns.sortWith((c1, c2) => if (c1.name.value == "id") true else if (c2.name.value == "id") false else c1.name.value.compareTo(c2.name.value) < 0)
+      val columns = table.columns
       columns foreach { col =>
         val colNode = columnsNode.append("column")
         colNode.set("name", col.name)
@@ -183,7 +183,7 @@ object Serializer {
       val viewNode = viewsNode.append("view", "name" -> view.name)
       viewNode.set("comment", view.commentAndModule)
       val columnsNode = viewNode.append("columns")
-      val columns = view.columns.sortWith((c1, c2) => if (c1.name.value == "id") true else if (c2.name.value == "id") false else c1.name.value.compareTo(c2.name.value) < 0)
+      val columns = view.columns
       columns foreach { col =>
         val colNode = columnsNode.append("column")
         colNode.set("name", col.name)

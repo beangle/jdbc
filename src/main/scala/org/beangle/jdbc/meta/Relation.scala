@@ -103,6 +103,14 @@ abstract class Relation(var schema: Schema, var name: Identifier) extends Ordere
     columns.result().map(_.name.toLiteral(e))
   }
 
+  /** 排序内部列(按名称升序),需要稳定列序时由调用方显式调用 */
+  def sortColumns: this.type = {
+    val ordered = columns.toList.sortBy(_.name.value)
+    columns.clear()
+    columns ++= ordered
+    this
+  }
+
   def qualifiedName: String = {
     Table.qualify(schema, name)
   }
