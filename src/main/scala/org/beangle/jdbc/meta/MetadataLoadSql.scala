@@ -18,20 +18,21 @@
 package org.beangle.jdbc.meta
 
 import org.beangle.commons.lang.Strings
+import scala.compiletime.uninitialized
 
 class MetadataLoadSql {
 
-  var primaryKeySql: String = _
+  var primaryKeySql: String = uninitialized
 
-  var importedKeySql: String = _
+  var importedKeySql: String = uninitialized
 
-  var indexInfoSql: String = _
+  var indexInfoSql: String = uninitialized
 
-  var sequenceSql: String = _
+  var sequenceSql: String = uninitialized
 
-  var viewDefSql: String = _
+  var viewDefSql: String = uninitialized
 
-  var basicSql: String = _
+  var basicSql: String = uninitialized
 
   def supportsTableExtra: Boolean = {
     Strings.isNotBlank(primaryKeySql) && Strings.isNotBlank(importedKeySql) && Strings.isNotBlank(indexInfoSql)

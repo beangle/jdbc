@@ -23,10 +23,11 @@ import org.beangle.jdbc.engine.Engine
 
 import java.io.Closeable
 import java.sql.ResultSet
+import scala.compiletime.uninitialized
 
 class ResultSetIterator(rs: ResultSet, engine: Engine) extends Iterator[Array[Any]] with Closeable {
 
-  var nextRecord: Array[Any] = _
+  var nextRecord: Array[Any] = uninitialized
 
   val types: Array[Int] = JdbcExecutor.getColumnTypes(rs, engine)
 

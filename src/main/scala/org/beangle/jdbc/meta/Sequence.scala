@@ -18,6 +18,7 @@
 package org.beangle.jdbc.meta
 
 import org.beangle.jdbc.engine.Engine
+import scala.compiletime.uninitialized
 
 class Sequence(var schema: Schema, var name: Identifier) extends Ordered[Sequence] {
 
@@ -27,7 +28,7 @@ class Sequence(var schema: Schema, var name: Identifier) extends Ordered[Sequenc
 
   var cache: Int = 32
 
-  var cycle: Boolean = _
+  var cycle: Boolean = uninitialized
 
   def qualifiedName: String = {
     val engine = schema.database.engine

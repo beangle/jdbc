@@ -46,7 +46,7 @@ object Serializer {
         }
         (tableElem \ "constraints") foreach { constraintsElem =>
           (constraintsElem \ "primary-key") foreach { pkElem =>
-            table.createPrimaryKey(pkElem("name"), split(pkElem("columns")).toSeq: _*)
+            table.createPrimaryKey(pkElem("name"), split(pkElem("columns")).toSeq*)
           }
           (constraintsElem \ "foreign-key") foreach { fkElem =>
             val name = fkElem("name")
@@ -58,14 +58,14 @@ object Serializer {
             fkElem.get("cascadeDelete").foreach(n => fk.cascadeDelete = n.toBoolean)
           }
           (constraintsElem \ "unique-key") foreach { ukElem =>
-            val uk = table.createUniqueKey(ukElem("name"), split(ukElem("columns")).toSeq: _*)
+            val uk = table.createUniqueKey(ukElem("name"), split(ukElem("columns")).toSeq*)
             ukElem.get("enabled").foreach(n => uk.enabled = n.toBoolean)
           }
         }
         (tableElem \ "indexes" \ "index") foreach { idxElem =>
           var unique = false
           idxElem.get("unique").foreach(n => unique = n.toBoolean)
-          table.createIndex(idxElem("name"), unique, split(idxElem("columns")).toSeq: _*)
+          table.createIndex(idxElem("name"), unique, split(idxElem("columns")).toSeq*)
         }
         table.convertIndexToUniqueKeys()
       }

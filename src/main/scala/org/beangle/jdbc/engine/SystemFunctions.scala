@@ -18,16 +18,17 @@
 package org.beangle.jdbc.engine
 
 import org.beangle.jdbc.meta.SqlType
+import scala.compiletime.uninitialized
 
 class SystemFunctions {
 
-  var currentDate: String = _
+  var currentDate: String = uninitialized
 
-  var localTime: String = _
-  var currentTime: String = _
+  var localTime: String = uninitialized
+  var currentTime: String = uninitialized
 
-  var localTimestamp: String = _
-  var currentTimestamp: String = _
+  var localTimestamp: String = uninitialized
+  var currentTimestamp: String = uninitialized
 
   def current(sqlType: SqlType): String = {
     sqlType.code match

@@ -40,7 +40,7 @@ class PostgreSQLTest extends AnyFlatSpec, Matchers {
   "big number (size >=65535) in postgresql " should " trip to less 1000 size" in {
     val scale = 0
     val precision = 65535
-    engine.toType(Types.NUMERIC, precision, scale).name equals "numeric(1000,0)" should be(true)
+    engine.toType(Types.NUMERIC, precision, scale).name `equals` "numeric(1000,0)" should be(true)
     engine.toType(Types.DECIMAL, 1, 0).name shouldEqual "boolean"
     engine.toType(Types.BLOB, 10000, 0).name shouldEqual "bytea"
 

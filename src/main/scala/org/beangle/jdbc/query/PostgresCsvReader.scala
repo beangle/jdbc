@@ -27,7 +27,7 @@ import java.time.{Instant, OffsetDateTime}
  *
  * @param itor
  */
-class PostgresCsvReader(itor: Iterator[Array[_]], types: collection.Seq[Int]) extends Reader {
+class PostgresCsvReader(itor: Iterator[Array[?]], types: collection.Seq[Int]) extends Reader {
   private val instantFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.Sx")
 
   private val zoneOffset = OffsetDateTime.now.getOffset
@@ -60,7 +60,7 @@ class PostgresCsvReader(itor: Iterator[Array[_]], types: collection.Seq[Int]) ex
     readLen
   }
 
-  private def makeString(data: Array[_], sqlTypes: Array[Int]): Unit = {
+  private def makeString(data: Array[?], sqlTypes: Array[Int]): Unit = {
     val sb = new java.lang.StringBuilder()
     import java.sql.Types.*
     data.indices foreach { i =>

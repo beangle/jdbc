@@ -48,7 +48,7 @@ object Parser {
 
   /** Read and parse script files into flattened statements. */
   def readStatements(parser: Parser, uris: URI*): List[Statement] = {
-    read(parser, uris: _*).flatMap(_.statements)
+    read(parser, uris*).flatMap(_.statements)
   }
 
   def forEngine(engine: Engine): Parser = {

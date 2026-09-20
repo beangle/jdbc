@@ -18,21 +18,22 @@
 package org.beangle.jdbc.engine
 
 import org.beangle.jdbc.engine.Options.TableOptions
+import scala.compiletime.uninitialized
 
 object Options {
 
   class AlterTableOption {
-    var changeType: String = _
-    var setNotNull: String = _
-    var dropNotNull: String = _
-    var setDefault: String = _
-    var dropDefault: String = _
-    var addPrimaryKey: String = _
-    var dropPrimaryKey: String = _
-    var dropConstraint: String = _
-    var addColumn: String = _
-    var dropColumn: String = _
-    var renameColumn: String = _
+    var changeType: String = uninitialized
+    var setNotNull: String = uninitialized
+    var dropNotNull: String = uninitialized
+    var setDefault: String = uninitialized
+    var dropDefault: String = uninitialized
+    var addPrimaryKey: String = uninitialized
+    var dropPrimaryKey: String = uninitialized
+    var dropConstraint: String = uninitialized
+    var addColumn: String = uninitialized
+    var dropColumn: String = uninitialized
+    var renameColumn: String = uninitialized
   }
 
   class CreateTableOption {
@@ -56,17 +57,17 @@ object Options {
   }
 
   class LimitOption {
-    var pattern: String = _
-    var offsetPattern: String = _
-    var bindInReverseOrder: Boolean = _
+    var pattern: String = uninitialized
+    var offsetPattern: String = uninitialized
+    var bindInReverseOrder: Boolean = uninitialized
   }
 
   class SequenceOption {
     var supports = true
     var createSql: String = "create sequence {name} start with {start} increment by {increment} {cycle}"
     var dropSql: String = "drop sequence {name}"
-    var nextValSql: String = _
-    var selectNextValSql: String = _
+    var nextValSql: String = uninitialized
+    var selectNextValSql: String = uninitialized
   }
 
   class TableOptions {

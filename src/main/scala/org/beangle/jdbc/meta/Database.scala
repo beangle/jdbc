@@ -20,11 +20,13 @@ package org.beangle.jdbc.meta
 import org.beangle.commons.lang.Strings
 import org.beangle.jdbc.engine.Engine
 
+import scala.compiletime.uninitialized
+
 class Database(val engine: Engine) {
 
   var version: String = "UNDEFINED"
 
-  var encoding: String = _
+  var encoding: String = uninitialized
 
   var schemas = new collection.mutable.HashMap[Identifier, Schema]
 
@@ -59,7 +61,7 @@ class Database(val engine: Engine) {
         case None => List.empty
       }
     } else {
-      schemas.values.flatten(_.findTables(name)).toSeq
+      schemas.values.flatten(using _.findTables(name)).toSeq
     }
   }
 
@@ -71,7 +73,7 @@ class Database(val engine: Engine) {
         case None => List.empty
       }
     } else {
-      schemas.values.flatten(_.findViews(name)).toSeq
+      schemas.values.flatten(using _.findViews(name)).toSeq
     }
   }
 

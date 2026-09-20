@@ -17,14 +17,16 @@
 
 package org.beangle.jdbc.meta
 
+import scala.compiletime.uninitialized
+
 class DBScripts {
-  var schemas: List[String] = _
-  var tables: List[String] = _
-  var sequences: List[String] = _
-  var keys:List[String]=_
-  var constraints: List[String] = _
-  var indices: List[String] = _
-  var comments: List[String] = _
-  var auxiliaries: List[String] = _
-  var warnings:List[String]=_
+  var schemas: List[String] = uninitialized
+  var tables: List[String] = uninitialized
+  var sequences: List[String] = uninitialized
+  var keys:List[String]=uninitialized
+  var constraints: List[String] = uninitialized
+  var indices: List[String] = uninitialized
+  var comments: List[String] = uninitialized
+  var auxiliaries: List[String] = uninitialized
+  var warnings:List[String]=uninitialized
 }

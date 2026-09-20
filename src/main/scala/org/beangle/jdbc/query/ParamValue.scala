@@ -45,4 +45,4 @@ object ParamValue {
   def nullInstant: ParamValue = ParamValue(null, java.sql.Types.TIMESTAMP_WITH_TIMEZONE)
 }
 
-case class TypedNull(clazz: Class[_])
+case class TypedNull(clazz: Class[?])

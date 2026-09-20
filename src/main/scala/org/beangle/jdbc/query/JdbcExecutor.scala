@@ -120,7 +120,7 @@ class JdbcExecutor(dataSource: DataSource) {
   var fetchSize = 1000
 
   def unique[T](sql: String, params: Any*): Option[T] = {
-    val rs = query(sql, params: _*)
+    val rs = query(sql, params*)
     if (rs.isEmpty) {
       None
     } else {
@@ -252,7 +252,7 @@ class JdbcExecutor(dataSource: DataSource) {
     ParamSetter.setParams(engine, stmt, params, types, 1)
   }
 
-  private def postgreCopy(sql: String, datas: collection.Seq[Array[_]], types: collection.Seq[Int]): Unit = {
+  private def postgreCopy(sql: String, datas: collection.Seq[Array[?]], types: collection.Seq[Int]): Unit = {
     val conn = dataSource.getConnection
     try {
       import org.postgresql.copy.CopyManager
@@ -282,7 +282,7 @@ class JdbcExecutor(dataSource: DataSource) {
    * @param datas
    * @param types
    */
-  def batchInsert(sql: String, datas: collection.Seq[Array[_]], types: collection.Seq[Int]): Unit = {
+  def batchInsert(sql: String, datas: collection.Seq[Array[?]], types: collection.Seq[Int]): Unit = {
     if (engine.supportMultiValueInsert) {
       if (engine.name.toLowerCase.startsWith("postgres") && !existComplexTypes(types)) {
         postgreCopy(sql, datas, types)
@@ -300,7 +300,7 @@ class JdbcExecutor(dataSource: DataSource) {
         sqls.put(1, newSql)
 
         var stmt: PreparedStatement = null
-        var curParam: Array[_] = null
+        var curParam: Array[?] = null
         var numSql: String = null
         try {
           val iter = datas.iterator
@@ -353,13 +353,13 @@ class JdbcExecutor(dataSource: DataSource) {
     rs
   }
 
-  def batch(sql: String, datas: collection.Seq[Array[_]], types: collection.Seq[Int]): Seq[Int] = {
+  def batch(sql: String, datas: collection.Seq[Array[?]], types: collection.Seq[Int]): Seq[Int] = {
     if (showSql) println("JdbcExecutor:" + sql)
     var stmt: PreparedStatement = null
     val conn = dataSource.getConnection
     if (conn.getAutoCommit) conn.setAutoCommit(false)
     val rows = new collection.mutable.ListBuffer[Int]
-    var curParam: Array[_] = null
+    var curParam: Array[?] = null
     try {
       stmt = conn.prepareStatement(sql)
       for (param <- datas) {
@@ -400,7 +400,7 @@ class JdbcExecutor(dataSource: DataSource) {
     throw e
   }
 
-  protected def rethrow2(cause: SQLException, sql: String, types: collection.Seq[Int], params: Array[_]): Unit = {
+  protected def rethrow2(cause: SQLException, sql: String, types: collection.Seq[Int], params: Array[?]): Unit = {
     val msg = new StringBuffer(if (cause.getMessage == null) "" else cause.getMessage)
     msg.append(" Query: ").append(sql).append(" Parameters: (")
     if (params == null) msg.append("[]")

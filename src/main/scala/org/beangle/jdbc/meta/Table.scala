@@ -220,7 +220,7 @@ class Table(s: Schema, n: Identifier) extends Relation(s, n) {
     refTable.primaryKey match {
       case Some(pk) =>
         val fk = new ForeignKey(this, Identifier("fk_temp"), eng.toIdentifier(columnName))
-        fk.refer(refTable, pk.columns.toSeq: _*)
+        fk.refer(refTable, pk.columns.toSeq*)
         if (Strings.isBlank(keyName)) {
           fk.name = eng.toIdentifier(Constraint.autoname(fk))
         } else {
@@ -287,7 +287,7 @@ class Table(s: Schema, n: Identifier) extends Relation(s, n) {
   def convertIndexToUniqueKeys(): Unit = {
     val ui = indexes.filter(i => i.unique && !i.name.value.toLowerCase.startsWith("idx"))
     indexes --= ui
-    ui foreach { i => createUniqueKey(i.name.value, i.columns.map(_.value).toSeq: _*) }
+    ui foreach { i => createUniqueKey(i.name.value, i.columns.map(_.value).toSeq*) }
   }
 }
 

@@ -26,9 +26,10 @@ import org.beangle.jdbc.meta.{Database, Identifier, MetadataLoader, Schema}
 import org.beangle.jdbc.query.JdbcExecutor
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import scala.compiletime.uninitialized
 
 class H2Test extends AnyFlatSpec, Matchers {
-  protected var schema: Schema = _
+  protected var schema: Schema = uninitialized
 
   protected def listTableAndSequences = {
     val tables = schema.tables

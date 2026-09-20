@@ -28,6 +28,7 @@ import org.beangle.jdbc.ds.DataSourceUtils.parseXml
 import java.io.{ByteArrayInputStream, InputStream}
 import java.net.URI
 import javax.sql.DataSource
+import scala.compiletime.uninitialized
 
 object DataSourceFactory {
   def build(driver: String, username: String, password: String, props: collection.Map[String, String]): DataSource = {
@@ -47,14 +48,14 @@ object DataSourceFactory {
  * @author chaostone
  */
 class DataSourceFactory extends Factory[DataSource], Initializing, Disposable {
-  var url: String = _
-  var user: String = _
-  var password: String = _
-  var driver: String = _
-  var name: String = _
+  var url: String = uninitialized
+  var user: String = uninitialized
+  var password: String = uninitialized
+  var driver: String = uninitialized
+  var name: String = uninitialized
   var props: collection.mutable.Map[String, String] = Collections.newMap
 
-  private var result: DataSource = _
+  private var result: DataSource = uninitialized
 
   override def getObject: DataSource = {
     result

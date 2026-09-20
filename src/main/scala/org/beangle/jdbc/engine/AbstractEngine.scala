@@ -21,10 +21,11 @@ import org.beangle.jdbc.SqlTypes
 import org.beangle.jdbc.meta.{MetadataLoadSql, SqlType}
 
 import java.sql.Types
+import scala.compiletime.uninitialized
 
 abstract class AbstractEngine extends Engine, AbstractDialect {
 
-  protected[engine] var typeNames: TypeNames = _
+  protected[engine] var typeNames: TypeNames = uninitialized
 
   private val typeMappingBuilder = new TypeNames.Builder()
 

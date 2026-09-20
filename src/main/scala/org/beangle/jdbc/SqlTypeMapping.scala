@@ -35,13 +35,13 @@ object SqlTypeMapping {
 
 trait SqlTypeMapping {
 
-  def sqlType(clazz: Class[_]): SqlType
+  def sqlType(clazz: Class[?]): SqlType
 
-  def sqlCode(clazz: Class[_]): Int
+  def sqlCode(clazz: Class[?]): Int
 }
 
 class DefaultSqlTypeMapping(engine: Engine) extends SqlTypeMapping {
-  private val concretTypes: Map[Class[_], Int] = Map(
+  private val concretTypes: Map[Class[?], Int] = Map(
     (classOf[Boolean], BOOLEAN),
     (classOf[java.lang.Boolean], BOOLEAN),
 
@@ -98,12 +98,12 @@ class DefaultSqlTypeMapping(engine: Engine) extends SqlTypeMapping {
     (classOf[JsonArray], SqlTypes.JSON),
   )
 
-  private val generalTypes: Map[Class[_], Int] = Map(
+  private val generalTypes: Map[Class[?], Int] = Map(
     (classOf[java.util.Date], TIMESTAMP),
     (classOf[CharSequence], VARCHAR),
     (classOf[Number], NUMERIC))
 
-  def sqlCode(clazz: Class[_]): Int = {
+  def sqlCode(clazz: Class[?]): Int = {
     concretTypes.get(clazz) match {
       case Some(c) => c
       case None =>
@@ -113,7 +113,7 @@ class DefaultSqlTypeMapping(engine: Engine) extends SqlTypeMapping {
           case None =>
             if (clazz.isAnnotationPresent(classOf[value])) {
               val ctors = clazz.getConstructors
-              var find: Class[_] = null
+              var find: Class[?] = null
               var i = 0
               while ((find eq null) && i < ctors.length) {
                 val ctor = ctors(i)
@@ -131,11 +131,11 @@ class DefaultSqlTypeMapping(engine: Engine) extends SqlTypeMapping {
     }
   }
 
-  private def raiseMappingError(clazz: Class[_]): Int = {
+  private def raiseMappingError(clazz: Class[?]): Int = {
     throw new RuntimeException(s"Cannot find sqltype for ${clazz.getName}")
   }
 
-  def sqlType(clazz: Class[_]): SqlType = {
+  def sqlType(clazz: Class[?]): SqlType = {
     if (clazz == classOf[Decimal5]) {
       engine.toType(DECIMAL, 19, 5)
     } else if (clazz == classOf[TinyDecimal5]) {

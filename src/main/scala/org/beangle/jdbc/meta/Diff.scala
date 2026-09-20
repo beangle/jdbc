@@ -23,6 +23,7 @@ import org.beangle.jdbc.engine.{AlterTableDialect, Engine}
 
 import java.io.File
 import scala.collection.mutable
+import scala.compiletime.uninitialized
 
 object Diff {
 
@@ -289,8 +290,8 @@ class DatabaseDiff(val older: Database, val newer: Database) {
 }
 
 class SchemaDiff(val older: Schema, val newer: Schema) {
-  var tables: NameDiff = _
-  var tableDiffs: Map[String, TableDiff] = _
+  var tables: NameDiff = uninitialized
+  var tableDiffs: Map[String, TableDiff] = uninitialized
 }
 
 case class NameDiff(newer: Set[String], removed: Set[String], renamed: Set[(String, String)],
@@ -307,12 +308,12 @@ case class NameDiff(newer: Set[String], removed: Set[String], renamed: Set[(Stri
 }
 
 class TableDiff(val older: Table, val newer: Table) {
-  var hasPrimaryKey: Boolean = _
-  var hasComment: Boolean = _
-  var columns: NameDiff = _
-  var uniqueKeys: NameDiff = _
-  var foreignKeys: NameDiff = _
-  var indexes: NameDiff = _
+  var hasPrimaryKey: Boolean = uninitialized
+  var hasComment: Boolean = uninitialized
+  var columns: NameDiff = uninitialized
+  var uniqueKeys: NameDiff = uninitialized
+  var foreignKeys: NameDiff = uninitialized
+  var indexes: NameDiff = uninitialized
 
   def isEmpty: Boolean = {
     !hasPrimaryKey && !hasComment && columns.isEmpty && uniqueKeys.isEmpty && foreignKeys.isEmpty && indexes.isEmpty

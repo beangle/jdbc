@@ -18,10 +18,11 @@
 package org.beangle.jdbc.query
 
 import java.sql.PreparedStatement
+import scala.compiletime.uninitialized
 
 class Statement(sql: String, executor: JdbcExecutor) {
 
-  private var setter: PreparedStatement => Unit = _
+  private var setter: PreparedStatement => Unit = uninitialized
 
   def prepare(setter: PreparedStatement => Unit): this.type = {
     this.setter = setter

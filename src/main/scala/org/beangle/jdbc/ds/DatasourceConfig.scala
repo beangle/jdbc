@@ -18,15 +18,16 @@
 package org.beangle.jdbc.ds
 
 import org.beangle.jdbc.meta.Identifier
+import scala.compiletime.uninitialized
 
 /**
  * using serverName/database or url alternative
  */
 class DatasourceConfig(val driver: String) {
-  var name: String = _
+  var name: String = uninitialized
 
-  var user: String = _
-  var password: String = _
+  var user: String = uninitialized
+  var password: String = uninitialized
 
   var props = new collection.mutable.HashMap[String, String]
   var schema: Option[Identifier] = None

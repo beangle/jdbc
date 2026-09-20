@@ -223,7 +223,7 @@ object ParamSetter {
     }
   }
 
-  private def isStringType(clazz: Class[_]): Boolean = {
+  private def isStringType(clazz: Class[?]): Boolean = {
     classOf[CharSequence].isAssignableFrom(clazz) || classOf[StringWriter].isAssignableFrom(clazz)
   }
 }

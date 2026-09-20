@@ -20,6 +20,7 @@ package org.beangle.jdbc.meta
 import org.beangle.jdbc.engine.Engine
 
 import scala.collection.mutable.ListBuffer
+import scala.compiletime.uninitialized
 
 /**
   * JDBC foreign key metadata
@@ -30,7 +31,7 @@ class ForeignKey(t: Table, n: Identifier, column: Identifier = null) extends Con
 
   var cascadeDelete: Boolean = false
   var referencedColumns = new ListBuffer[Identifier]
-  var referencedTable: TableRef = _
+  var referencedTable: TableRef = uninitialized
 
   addColumn(column)
 
