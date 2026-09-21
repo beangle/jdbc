@@ -55,7 +55,7 @@ object Runner {
           } catch {
             case e: Exception =>
               success = false
-              JdbcLogger.error(s"Failure when exceute sql $statement.sql", e)
+              JdbcLogger.error(s"Failure when exceute sql ${statement.sql}", e)
               if (!ignoreError) throw e
           }
         }
